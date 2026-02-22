@@ -1,3 +1,18 @@
+/**
+ * Carpeta: styles
+ * 
+ * Esta carpeta contiene estilos globales, variables CSS, temas, mixins,
+ * y configuraciones de estilo que se usan en toda la aplicación.
+ * 
+ * Ejemplos: theme.css, reset.css, variables.css, animations.css
+ * 
+ * Características:
+ * - Define variables CSS globales (colores, tipografías, espaciados)
+ * - Reset/normalize de estilos del navegador
+ * - Mixins y utilidades de CSS
+ * - Configuración de temas (dark mode, etc.)
+ */
+
 :root {
   --color-brand: #0f4c5c;
   --color-accent: #e36414;

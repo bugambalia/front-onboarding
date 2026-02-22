@@ -1,3 +1,18 @@
+/**
+ * Carpeta: context
+ * 
+ * Esta carpeta contiene los Contexts de React y sus Providers para manejar
+ * estado global compartido entre componentes sin prop drilling.
+ * 
+ * Ejemplos: AuthContext, ThemeContext, UserContext, AppContext
+ * 
+ * Características:
+ * - Maneja estado global de la aplicación
+ * - Evita prop drilling excesivo
+ * - Cada contexto incluye Provider y hook personalizado (useXContext)
+ * - Útil para autenticación, temas, configuración, usuario actual
+ */
+
 import { createContext, useContext } from "react";
 
 type AppContextValue = {
