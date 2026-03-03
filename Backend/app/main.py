@@ -14,10 +14,19 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Configurar CORS
+# Configurar CORS - Permitir múltiples orígenes
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:5174",
+    "https://localhost:5173",
+    # Agregar aquí el dominio de producción del frontend cuando esté disponible
+    # "https://tu-frontend.dominio.com",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
