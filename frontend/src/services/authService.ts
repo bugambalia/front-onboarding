@@ -7,17 +7,20 @@ import type { LoginRequest, LoginResponse } from "@/types/auth";
 import { API_BASE_URL } from "@/config/env";
 
 const AUTH_ENDPOINTS = {
-  LOGIN: `${API_BASE_URL}/api/v1/auth/login`,
-  LOGOUT: `${API_BASE_URL}/api/v1/auth/logout`,
+  LOGIN: `${API_BASE_URL}/v1/auth/login`,
+  LOGOUT: `${API_BASE_URL}/v1/auth/logout`,
 };
 
 class AuthService {
   /**
    * Realiza login del usuario
-   * POST /api/v1/auth/login
+   * POST /v1/auth/login
    */
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     try {
+      console.log("Intentando login en:", AUTH_ENDPOINTS.LOGIN);
+      console.log("Credenciales:", { correo: credentials.correo });
+      
       const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: {
@@ -26,11 +29,16 @@ class AuthService {
         body: JSON.stringify(credentials),
       });
 
+      console.log("Respuesta status:", response.status);
+
       if (!response.ok) {
-        throw new Error("Credenciales inválidas");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error del servidor:", errorData);
+        throw new Error(errorData.detail || "Credenciales inválidas");
       }
 
       const data: LoginResponse = await response.json();
+      console.log("Login exitoso");
       
       // Guardar token en localStorage
       if (data.token) {
