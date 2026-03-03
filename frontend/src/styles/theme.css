@@ -14,12 +14,16 @@
  */
 
 :root {
-  --color-brand: #0f4c5c;
-  --color-accent: #e36414;
+  --color-primary: #1B365D;
+  --color-secondary: #28A745;
+  --color-accent: #C59D42;
+  --color-background: #F8F9FA;
+  --color-text: #333333;
   --font-body: "Space Grotesk", system-ui, sans-serif;
 }
 
 body {
   font-family: var(--font-body);
-  color: var(--color-brand);
+  color: var(--color-text);
+  background-color: var(--color-background);
 }
