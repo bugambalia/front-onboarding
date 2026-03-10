@@ -8,13 +8,14 @@ import './App.css'
 
 function AppContent() {
   const location = useLocation();
-  const showHeader = location.pathname !== '/login';
+  const showHeader = location.pathname !== '/login' && location.pathname !== '/';
 
   return (
     <>
       {showHeader && <Header />}
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/home" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/dashboard"
