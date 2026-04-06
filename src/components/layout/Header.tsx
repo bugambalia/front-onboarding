@@ -3,11 +3,16 @@
  */
 
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export function Header() {
   const { isAuthenticated, usuario, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const rol = (usuario?.rol ?? "").toLowerCase();
+  const cargo = usuario?.cargo;
+  const isRrhh = rol.includes("recursos humanos") || rol === "rrhh" || cargo === 1 || cargo === 48 || cargo === 49;
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -18,6 +23,16 @@ export function Header() {
     navigate("/");
   };
 
+  const goToHomeView = (view?: "signup" | "onboarding") => {
+    if (view) {
+      navigate(`/home/rrhh/${view}`);
+      return;
+    }
+    navigate("/home");
+  };
+
+  const inProtectedArea = location.pathname.startsWith("/home");
+
   return (
     <header className="app-header">
       <div className="header-content">
@@ -26,6 +41,21 @@ export function Header() {
         <nav className="header-nav">
           {isAuthenticated ? (
             <>
+              {inProtectedArea && (
+                <button onClick={() => goToHomeView()} className="btn-small">
+                  Inicio
+                </button>
+              )}
+              {inProtectedArea && isRrhh && (
+                <>
+                  <button onClick={() => goToHomeView("signup")} className="btn-small">
+                    Registrar Usuario
+                  </button>
+                  <button onClick={() => goToHomeView("onboarding")} className="btn-small">
+                    Crear Onboarding
+                  </button>
+                </>
+              )}
               <span className="user-info">
                 Hola, {usuario?.correo}
               </span>

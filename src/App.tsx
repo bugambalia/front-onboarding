@@ -24,6 +24,8 @@ function AppContent() {
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<HomePage />} />
+          <Route path="/home/rrhh/signup" element={<HomePage />} />
+          <Route path="/home/rrhh/onboarding" element={<HomePage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

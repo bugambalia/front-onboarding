@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { authService } from "@/services/authService";
 import { onboardingService } from "@/services/onboardingService";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export function RRHHDashboard() {
     const { usuario } = useAuth();
+    const location = useLocation();
+    const navigate = useNavigate();
     const [showSignup, setShowSignup] = useState(false);
     const [showOnboarding, setShowOnboarding] = useState(false);
     const [formData, setFormData] = useState({ correo: "", nombre: "", rol: "Operador" });
@@ -16,6 +19,40 @@ export function RRHHDashboard() {
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
+
+    useEffect(() => {
+        const path = location.pathname;
+
+        if (path === "/home/rrhh/signup") {
+            setShowSignup(true);
+            setShowOnboarding(false);
+            return;
+        }
+
+        if (path === "/home/rrhh/onboarding") {
+            setShowOnboarding(true);
+            setShowSignup(false);
+            return;
+        }
+
+        const query = new URLSearchParams(location.search);
+        const view = query.get("view");
+
+        if (view === "signup") {
+            setShowSignup(true);
+            setShowOnboarding(false);
+            return;
+        }
+
+        if (view === "onboarding") {
+            setShowOnboarding(true);
+            setShowSignup(false);
+            return;
+        }
+
+        setShowSignup(false);
+        setShowOnboarding(false);
+    }, [location.pathname, location.search]);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -111,7 +148,7 @@ export function RRHHDashboard() {
                         )}
 
                         <div className="form-actions">
-                            <button type="button" className="btn-secondary" onClick={() => setShowSignup(false)}>Cancelar</button>
+                            <button type="button" className="btn-secondary" onClick={() => navigate("/home")}>Cancelar</button>
                             <button type="submit" className="btn-primary" disabled={loading}>
                                 {loading ? "Registrando..." : "Confirmar Registro"}
                             </button>
@@ -172,7 +209,7 @@ export function RRHHDashboard() {
                         )}
 
                         <div className="form-actions">
-                            <button type="button" className="btn-secondary" onClick={() => setShowOnboarding(false)}>Cancelar</button>
+                            <button type="button" className="btn-secondary" onClick={() => navigate("/home")}>Cancelar</button>
                             <button type="submit" className="btn-primary" disabled={loading}>
                                 {loading ? "Iniciando Proceso" : "Crear Onboarding"}
                             </button>
@@ -187,14 +224,14 @@ export function RRHHDashboard() {
                         <div className="card-icon">👤</div>
                         <h3>Gestión de Usuarios</h3>
                         <p>Registra nuevos colaboradores en la plataforma y gestiona sus credenciales.</p>
-                        <button className="btn-primary" onClick={() => setShowSignup(true)}>Registrar Usuario</button>
+                        <button className="btn-primary" onClick={() => navigate("/home/rrhh/signup")}>Registrar Usuario</button>
                     </section>
 
                     <section className="dashboard-card action-card">
                         <div className="card-icon">🚀</div>
                         <h3>Iniciar Onboarding</h3>
                         <p>Crea un nuevo proceso de inducción vinculando al usuario con su área y equipo.</p>
-                        <button className="btn-primary" onClick={() => setShowOnboarding(true)}>Crear Onboarding</button>
+                        <button className="btn-primary" onClick={() => navigate("/home/rrhh/onboarding")}>Crear Onboarding</button>
                     </section>
 
                     <section className="dashboard-card status-card">
