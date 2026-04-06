@@ -3,10 +3,11 @@
  * Maneja el estado global de autenticación de la aplicación
  */
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { User } from "@/types/auth";
 import { authService } from "@/services/authService";
+import { API_BASE_URL } from "@/config/env";
 
 interface AuthContextType {
   token: string | null;
@@ -22,7 +23,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(authService.getToken());
   const [usuario, setUsuario] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Empieza en true para el chequeo inicial
+
+  // Efecto para cargar el usuario al iniciar o al refrescar
+  useEffect(() => {
+    const initAuth = async () => {
+      const storedToken = authService.getToken();
+      if (storedToken) {
+        try {
+          // Intentamos obtener el usuario actual desde /me
+          const response = await fetch(`${API_BASE_URL}/v1/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${storedToken}`,
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            setUsuario(data);
+          } else {
+            // Si el token no es válido, cerramos sesión
+            authService.logout();
+            setToken(null);
+            setUsuario(null);
+          }
+        } catch (error) {
+          console.error("Error cargando perfil:", error);
+        }
+      }
+      setIsLoading(false);
+    };
+
+    initAuth();
+  }, []);
 
   const login = async (correo: string, contrasena: string) => {
     setIsLoading(true);

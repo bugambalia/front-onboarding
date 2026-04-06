@@ -21,7 +21,7 @@ export function LoginPage() {
 
     try {
       await login(correo, contrasena);
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       setError("Error al iniciar sesión. Verifica tus credenciales.");
     }
