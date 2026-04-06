@@ -3,7 +3,7 @@
  * Maneja login, logout y gestión de token
  */
 
-import type { LoginRequest, LoginResponse } from "@/types/auth";
+import type { LoginRequest, LoginResponse, User } from "@/types/auth";
 import { API_BASE_URL } from "@/config/env";
 
 const AUTH_ENDPOINTS = {
@@ -20,7 +20,7 @@ class AuthService {
     try {
       console.log("Intentando login en:", AUTH_ENDPOINTS.LOGIN);
       console.log("Credenciales:", { correo: credentials.correo });
-      
+
       const response = await fetch(AUTH_ENDPOINTS.LOGIN, {
         method: "POST",
         headers: {
@@ -39,7 +39,7 @@ class AuthService {
 
       const data: LoginResponse = await response.json();
       console.log("Login exitoso");
-      
+
       // Guardar token en localStorage
       if (data.token) {
         localStorage.setItem("access_token", data.token);
@@ -69,6 +69,53 @@ class AuthService {
     } finally {
       localStorage.removeItem("access_token");
     }
+  }
+
+  /**
+   * Registra un nuevo colaborador (RRHH)
+   * POST /v1/auth/signup
+   */
+  async signup(data: { correo: string; rol: string }): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/v1/auth/signup`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.getToken()}`,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Error registrando usuario");
+    }
+  }
+
+  /**
+   * Obtiene la lista de cargos (puestos)
+   * GET /v1/auth/cargos
+   */
+  async getCargos(): Promise<{ id: number; nombre: string }[]> {
+    const response = await fetch(`${API_BASE_URL}/v1/auth/cargos`, {
+      headers: {
+        Authorization: `Bearer ${this.getToken()}`,
+      },
+    });
+    if (!response.ok) throw new Error("Error obteniendo cargos");
+    return response.json();
+  }
+
+  /**
+   * Obtiene la información del usuario actual
+   * GET /v1/auth/me
+   */
+  async getMe(): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/v1/auth/me`, {
+      headers: {
+        Authorization: `Bearer ${this.getToken()}`,
+      },
+    });
+    if (!response.ok) throw new Error("No autenticado");
+    return response.json();
   }
 
   /**

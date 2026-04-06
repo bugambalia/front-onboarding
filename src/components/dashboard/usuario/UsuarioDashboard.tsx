@@ -1,60 +1,120 @@
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { onboardingService } from "@/services/onboardingService";
+import type { OnboardingRequest } from "@/types/onboarding";
 
 export function UsuarioDashboard() {
     const { usuario } = useAuth();
+    const [miOnboarding, setMiOnboarding] = useState<OnboardingRequest | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMiStatus = async () => {
+            try {
+                const data = await onboardingService.getMyRequests();
+                if (data.length > 0) setMiOnboarding(data[0]);
+            } catch (error) {
+                console.error("Error cargando mi onboarding:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMiStatus();
+    }, []);
+
+    const handleFinalizar = async () => {
+        if (!miOnboarding) return;
+        try {
+            await onboardingService.updateStatus(miOnboarding.id, { estado: "completado" });
+            setMiOnboarding({ ...miOnboarding, estado: "completado" });
+        } catch (error) {
+            alert("Error al finalizar el proceso");
+        }
+    };
+
+    if (loading) return <div className="loading-container">Cargando tu progreso...</div>;
+
+    if (!miOnboarding) {
+        return (
+            <div className="dashboard-container">
+                <header className="dashboard-header">
+                    <h1>¡Hola de nuevo!</h1>
+                    <p>Bienvenido, {usuario?.correo}. No tienes procesos de onboarding activos actualmente.</p>
+                </header>
+            </div>
+        );
+    }
+
+    const getProgress = (estado: string) => {
+        switch (estado) {
+            case "creado": return 25;
+            case "dotacion_enviada": return 60;
+            case "activo": return 90;
+            case "completado": return 100;
+            default: return 0;
+        }
+    };
 
     return (
         <div className="dashboard-container">
             <header className="dashboard-header">
-                <h1>¡Bienvenido a tu nueva etapa!</h1>
-                <p>Tu proceso de inducción, {usuario?.correo}</p>
+                <h1>Tu Integración</h1>
+                <p>Bienvenido a la empresa. Aquí puedes ver el avance de tu ingreso.</p>
             </header>
 
             <div className="dashboard-grid">
                 <section className="dashboard-card status-card">
                     <h3>Progreso de Onboarding</h3>
                     <div className="progress-bar-container">
-                        <div className="progress-bar-fill" style={{ width: '65%' }}></div>
+                        <div
+                            className="progress-bar-fill"
+                            style={{ width: `${getProgress(miOnboarding.estado)}%` }}
+                        ></div>
                     </div>
-                    <p className="progress-percentage">65% completado</p>
-                    <div className="stats-row">
-                        <div className="stat-item">
-                            <span className="stat-value">Activo</span>
-                            <span className="stat-label">Estado</span>
-                        </div>
-                        <button className="btn-primary btn-finalize">Finalizar Proceso</button>
-                    </div>
-                </section>
+                    <p className="progress-percentage">{getProgress(miOnboarding.estado)}% Completado</p>
 
-                <section className="dashboard-card status-card">
-                    <h3>Tu Información</h3>
                     <div className="user-details">
-                        <p><strong>Correo:</strong> {usuario?.correo}</p>
-                        <p><strong>Cargo:</strong> {usuario?.rol}</p>
-                        <p><strong>Área:</strong> Desarrollo</p>
+                        <p><strong>Estado Actual:</strong> <span className="badge badge-info">{miOnboarding.estado.replace("_", " ")}</span></p>
+                        <p><strong>Fecha Inicio:</strong> {new Date(miOnboarding.fecha_inicio).toLocaleDateString()}</p>
                     </div>
-                </section>
-            </div>
 
-            <div className="dashboard-grid">
-                <section className="dashboard-card area-card">
+                    {miOnboarding.estado === "activo" && (
+                        <button className="btn-primary btn-finalize" onClick={handleFinalizar}>
+                            Finalizar Mi Onboarding
+                        </button>
+                    )}
+                    {miOnboarding.estado === "completado" && (
+                        <div className="message-banner success">🎉 ¡Integración completada exitosamente!</div>
+                    )}
+                </section>
+
+                <section className="dashboard-card info-card">
                     <h3>Tu Estación de Trabajo</h3>
-                    <div className="workstation-placeholder">
-                        <div className="workstation-icon">🏢</div>
-                        <p className="workstation-id">Estación B-12</p>
-                        <p>Nivel 2, Ala Norte</p>
-                        <button className="btn-small">Ver Mapa Completo</button>
-                    </div>
-                </section>
-
-                <section className="dashboard-card help-card">
-                    <h3>Recursos de Apoyo</h3>
-                    <div className="help-links">
-                        <button className="btn-small">Guía de Bienvenida</button>
-                        <button className="btn-small">Contactar Soporte</button>
-                    </div>
+                    {(miOnboarding.puesto_id || miOnboarding.puesto_asignado) ? (
+                        <div className="workstation-placeholder">
+                            <span className="workstation-icon">💻</span>
+                            <p className="workstation-id">Estación {miOnboarding.puesto_id || miOnboarding.puesto_asignado}</p>
+                            <p className="helper-text">Ubicada en el área de desarrollo, piso 2.</p>
+                        </div>
+                    ) : (
+                        <div className="workstation-placeholder">
+                            <span className="workstation-icon">🏢</span>
+                            <p className="helper-text">Tu estación física está siendo preparada por el equipo de infraestructura.</p>
+                        </div>
+                    )}
                 </section>
             </div>
+
+
+            <section className="recent-activity">
+                <h3>Recursos y Soporte</h3>
+                <div className="help-links">
+                    <button className="btn-small">Manual del Colaborador</button>
+                    <button className="btn-small">Políticas de Seguridad</button>
+                    <button className="btn-small">Contactar RRHH</button>
+                </div>
+            </section>
         </div>
     );
 }
+

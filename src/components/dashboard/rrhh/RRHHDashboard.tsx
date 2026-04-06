@@ -1,7 +1,53 @@
+import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { authService } from "@/services/authService";
+import { onboardingService } from "@/services/onboardingService";
 
 export function RRHHDashboard() {
     const { usuario } = useAuth();
+    const [showSignup, setShowSignup] = useState(false);
+    const [showOnboarding, setShowOnboarding] = useState(false);
+    const [formData, setFormData] = useState({ correo: "", rol: "usuario comun" });
+    const [onboardingData, setOnboardingData] = useState({ usuario_id: "", jefe_id: "" });
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState({ type: "", text: "" });
+
+    const handleSignup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage({ type: "", text: "" });
+
+        try {
+            await authService.signup(formData);
+            setMessage({ type: "success", text: "Usuario registrado con éxito. Se ha enviado un correo para activar la contraseña." });
+            setFormData({ correo: "", rol: "usuario comun" });
+            setTimeout(() => setShowSignup(false), 3000);
+        } catch (error: any) {
+            setMessage({ type: "error", text: error.message || "Error al registrar usuario" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleStartOnboarding = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage({ type: "", text: "" });
+
+        try {
+            await onboardingService.create({
+                usuario_id: Number(onboardingData.usuario_id),
+                jefe_id: Number(onboardingData.jefe_id)
+            });
+            setMessage({ type: "success", text: "Proceso de onboarding iniciado. Se ha notificado al jefe de área." });
+            setOnboardingData({ usuario_id: "", jefe_id: "" });
+            setTimeout(() => setShowOnboarding(false), 3000);
+        } catch (error: any) {
+            setMessage({ type: "error", text: error.message || "Error al iniciar onboarding" });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="dashboard-container">
@@ -10,35 +56,126 @@ export function RRHHDashboard() {
                 <p>Bienvenido de nuevo, {usuario?.correo}</p>
             </header>
 
-            <div className="dashboard-grid">
-                <section className="dashboard-card action-card">
-                    <div className="card-icon">👤</div>
-                    <h3>Gestión de Usuarios</h3>
-                    <p>Registra nuevos colaboradores en la plataforma y gestiona sus credenciales.</p>
-                    <button className="btn-primary">Registrar Usuario</button>
-                </section>
+            {showSignup && (
+                <section className="dashboard-card signup-section">
+                    <h3>Registrar Nuevo Colaborador</h3>
+                    <p>Se enviará un correo automático para la activación de la cuenta.</p>
 
-                <section className="dashboard-card action-card">
-                    <div className="card-icon">🚀</div>
-                    <h3>Iniciar Onboarding</h3>
-                    <p>Crea un nuevo proceso de inducción vinculando al usuario con su área y equipo.</p>
-                    <button className="btn-primary">Crear Onboarding</button>
-                </section>
+                    <form onSubmit={handleSignup} className="signup-form">
+                        <div className="form-group">
+                            <label>Correo Electrónico</label>
+                            <input
+                                type="email"
+                                required
+                                value={formData.correo}
+                                onChange={(e) => setFormData({ ...formData, correo: e.target.value })}
+                                placeholder="ejemplo@empresa.com"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Rol en el Sistema</label>
+                            <select
+                                value={formData.rol}
+                                onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+                                className="form-select"
+                            >
+                                <option value="usuario comun">Usuario Común (Nuevo Ingreso)</option>
+                                <option value="jefe de area">Jefe de Área</option>
+                                <option value="jefe de inventario">Jefe de Inventario</option>
+                                <option value="recursos humanos">Recursos Humanos</option>
+                            </select>
+                        </div>
 
-                <section className="dashboard-card status-card">
-                    <h3>Estado Global</h3>
-                    <div className="stats-row">
-                        <div className="stat-item">
-                            <span className="stat-value">12</span>
-                            <span className="stat-label">Activos</span>
+                        {message.text && (
+                            <div className={`message-banner ${message.type}`}>
+                                {message.text}
+                            </div>
+                        )}
+
+                        <div className="form-actions">
+                            <button type="button" className="btn-secondary" onClick={() => setShowSignup(false)}>Cancelar</button>
+                            <button type="submit" className="btn-primary" disabled={loading}>
+                                {loading ? "Registrando..." : "Confirmar Registro"}
+                            </button>
                         </div>
-                        <div className="stat-item">
-                            <span className="stat-value">5</span>
-                            <span className="stat-label">Pendientes</span>
-                        </div>
-                    </div>
+                    </form>
                 </section>
-            </div>
+            )}
+
+            {showOnboarding && (
+                <section className="dashboard-card signup-section">
+                    <h3>Vincular Onboarding</h3>
+                    <p>Asocia a un usuario con su jefe de área para iniciar el flujo de dotación.</p>
+
+                    <form onSubmit={handleStartOnboarding} className="signup-form">
+                        <div className="form-group">
+                            <label>ID del Usuario (Nuevo Ingreso)</label>
+                            <input
+                                type="number"
+                                required
+                                value={onboardingData.usuario_id}
+                                onChange={(e) => setOnboardingData({ ...onboardingData, usuario_id: e.target.value })}
+                                placeholder="Ej: 15"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>ID del Jefe de Área</label>
+                            <input
+                                type="number"
+                                required
+                                value={onboardingData.jefe_id}
+                                onChange={(e) => setOnboardingData({ ...onboardingData, jefe_id: e.target.value })}
+                                placeholder="Ej: 2"
+                            />
+                        </div>
+
+                        {message.text && (
+                            <div className={`message-banner ${message.type}`}>
+                                {message.text}
+                            </div>
+                        )}
+
+                        <div className="form-actions">
+                            <button type="button" className="btn-secondary" onClick={() => setShowOnboarding(false)}>Cancelar</button>
+                            <button type="submit" className="btn-primary" disabled={loading}>
+                                {loading ? "Iniciando Proceso" : "Crear Onboarding"}
+                            </button>
+                        </div>
+                    </form>
+                </section>
+            )}
+
+            {!showSignup && !showOnboarding && (
+                <div className="dashboard-grid">
+                    <section className="dashboard-card action-card">
+                        <div className="card-icon">👤</div>
+                        <h3>Gestión de Usuarios</h3>
+                        <p>Registra nuevos colaboradores en la plataforma y gestiona sus credenciales.</p>
+                        <button className="btn-primary" onClick={() => setShowSignup(true)}>Registrar Usuario</button>
+                    </section>
+
+                    <section className="dashboard-card action-card">
+                        <div className="card-icon">🚀</div>
+                        <h3>Iniciar Onboarding</h3>
+                        <p>Crea un nuevo proceso de inducción vinculando al usuario con su área y equipo.</p>
+                        <button className="btn-primary" onClick={() => setShowOnboarding(true)}>Crear Onboarding</button>
+                    </section>
+
+                    <section className="dashboard-card status-card">
+                        <h3>Estado Global</h3>
+                        <div className="stats-row">
+                            <div className="stat-item">
+                                <span className="stat-value">12</span>
+                                <span className="stat-label">Activos</span>
+                            </div>
+                            <div className="stat-item">
+                                <span className="stat-value">5</span>
+                                <span className="stat-label">Pendientes</span>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            )}
 
             <section className="recent-activity">
                 <h3>Actividad Reciente</h3>
