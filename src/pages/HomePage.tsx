@@ -23,7 +23,7 @@ export function HomePage() {
 
   // Despacho de componentes basado en el rol con mayor precisión
   const renderDashboard = () => {
-    const rol = usuario.rol.toLowerCase().trim();
+    const rol = (usuario.rol ?? "").toLowerCase().trim();
 
     // 1. Prioridad: Recursos Humanos
     if (rol === "recursos humanos" || rol === "rrhh") {

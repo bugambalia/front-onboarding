@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
-import type { OnboardingRequest } from "@/types/onboarding";
+import type { OnboardingResponse } from "@/types/onboarding";
 
 export function JefeDashboard() {
     const { usuario } = useAuth();
-    const [solicitudes, setSolicitudes] = useState<OnboardingRequest[]>([]);
-    const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingRequest | null>(null);
+    const [solicitudes, setSolicitudes] = useState<OnboardingResponse[]>([]);
+    const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingResponse | null>(null);
     const [dotacion, setDotacion] = useState({
         laptops: "",
         uniformes: "",
@@ -132,7 +132,7 @@ export function JefeDashboard() {
                                     <tr>
                                         <th>ID Solicitud</th>
                                         <th>Usuario ID</th>
-                                        <th>Fecha Inicio</th>
+                                        <th>Fecha Creación</th>
                                         <th>Estado</th>
                                         <th>Acción</th>
                                     </tr>
@@ -141,8 +141,8 @@ export function JefeDashboard() {
                                     {solicitudes.map((sol) => (
                                         <tr key={sol.id}>
                                             <td>#{sol.id}</td>
-                                            <td>ID: {sol.usuario_id}</td>
-                                            <td>{new Date(sol.fecha_inicio).toLocaleDateString()}</td>
+                                            <td>ID: {sol.id_empleado}</td>
+                                            <td>{new Date(sol.fecha_creacion).toLocaleDateString()}</td>
                                             <td><span className="badge badge-warning">{sol.estado}</span></td>
                                             <td>
                                                 <button

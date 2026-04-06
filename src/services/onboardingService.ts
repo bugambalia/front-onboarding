@@ -5,7 +5,12 @@
 
 import { API_BASE_URL } from "@/config/env";
 import { authService } from "./authService";
-import type { OnboardingRequest, DotacionRequest } from "@/types/onboarding";
+import type {
+    OnboardingCreateRequest,
+    OnboardingResponse,
+    OnboardingUpdateRequest,
+    DotacionRequest,
+} from "@/types/onboarding";
 
 const ONBOARDING_ENDPOINTS = {
     LISTA: `${API_BASE_URL}/v1/onboarding/`,
@@ -30,7 +35,7 @@ class OnboardingService {
     /**
      * Listar todas las solicitudes (RRHH)
      */
-    async getAll(): Promise<OnboardingRequest[]> {
+    async getAll(): Promise<OnboardingResponse[]> {
         const response = await fetch(ONBOARDING_ENDPOINTS.LISTA, {
             headers: this.getHeaders(),
         });
@@ -41,7 +46,7 @@ class OnboardingService {
     /**
      * Listar solicitudes de mi equipo (Jefe de Área)
      */
-    async getTeamRequests(): Promise<OnboardingRequest[]> {
+    async getTeamRequests(): Promise<OnboardingResponse[]> {
         const response = await fetch(ONBOARDING_ENDPOINTS.EQUIPO, {
             headers: this.getHeaders(),
         });
@@ -52,7 +57,7 @@ class OnboardingService {
     /**
      * Listar mis solicitudes (Empleado)
      */
-    async getMyRequests(): Promise<OnboardingRequest[]> {
+    async getMyRequests(): Promise<OnboardingResponse[]> {
         const response = await fetch(ONBOARDING_ENDPOINTS.ASIGNADAS, {
             headers: this.getHeaders(),
         });
@@ -63,7 +68,7 @@ class OnboardingService {
     /**
      * Crear nueva solicitud de onboarding (RRHH)
      */
-    async create(data: { usuario_id: number; jefe_id: number }): Promise<OnboardingRequest> {
+    async create(data: OnboardingCreateRequest): Promise<OnboardingResponse> {
         const response = await fetch(ONBOARDING_ENDPOINTS.LISTA, {
             method: "POST",
             headers: this.getHeaders(),
@@ -77,12 +82,21 @@ class OnboardingService {
      * Enviar dotación/implementos (Jefe de Área)
      */
     async requestEquipment(solicitudId: number, dotacion: DotacionRequest): Promise<void> {
+        const especificacion = [
+            ...(dotacion.laptops ?? []).map((item) => `Laptop/Equipo: ${item}`),
+            ...(dotacion.uniformes ?? []).map((item) => `Uniforme: ${item}`),
+            ...(dotacion.cursos ?? []).map((item) => `Curso: ${item}`),
+            ...(dotacion.otros ?? []).map((item) => `Otro: ${item}`),
+            `Solicitud onboarding: ${solicitudId}`,
+        ].join(" | ");
+
         const response = await fetch(ONBOARDING_ENDPOINTS.DOTACION, {
             method: "POST",
             headers: this.getHeaders(),
             body: JSON.stringify({
-                solicitud_id: solicitudId,
-                dotacion
+                encargado: `Jefe área - solicitud ${solicitudId}`,
+                tipo: "Onboarding",
+                especificacion,
             }),
         });
         if (!response.ok) throw new Error("Error enviando solicitud de dotación");
@@ -91,13 +105,14 @@ class OnboardingService {
     /**
      * Actualizar estado o asignar puesto (Inventario/Otros)
      */
-    async updateStatus(id: number, update: Partial<OnboardingRequest>): Promise<void> {
+    async updateStatus(id: number, update: OnboardingUpdateRequest): Promise<OnboardingResponse> {
         const response = await fetch(ONBOARDING_ENDPOINTS.ACTUALIZAR(id), {
             method: "PATCH",
             headers: this.getHeaders(),
             body: JSON.stringify(update),
         });
         if (!response.ok) throw new Error("Error actualizando proceso de onboarding");
+        return response.json();
     }
 }
 

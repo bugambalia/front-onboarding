@@ -7,8 +7,13 @@ export function RRHHDashboard() {
     const { usuario } = useAuth();
     const [showSignup, setShowSignup] = useState(false);
     const [showOnboarding, setShowOnboarding] = useState(false);
-    const [formData, setFormData] = useState({ correo: "", rol: "usuario comun" });
-    const [onboardingData, setOnboardingData] = useState({ usuario_id: "", jefe_id: "" });
+    const [formData, setFormData] = useState({ correo: "", nombre: "", rol: "Operador" });
+    const [onboardingData, setOnboardingData] = useState({
+        id_empleado: "",
+        destinatario: "",
+        fecha_fin: "",
+        especificaciones: "",
+    });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
 
@@ -20,7 +25,7 @@ export function RRHHDashboard() {
         try {
             await authService.signup(formData);
             setMessage({ type: "success", text: "Usuario registrado con éxito. Se ha enviado un correo para activar la contraseña." });
-            setFormData({ correo: "", rol: "usuario comun" });
+            setFormData({ correo: "", nombre: "", rol: "Operador" });
             setTimeout(() => setShowSignup(false), 3000);
         } catch (error: any) {
             setMessage({ type: "error", text: error.message || "Error al registrar usuario" });
@@ -36,11 +41,14 @@ export function RRHHDashboard() {
 
         try {
             await onboardingService.create({
-                usuario_id: Number(onboardingData.usuario_id),
-                jefe_id: Number(onboardingData.jefe_id)
+                id_empleado: Number(onboardingData.id_empleado),
+                fecha_fin: new Date(onboardingData.fecha_fin).toISOString(),
+                destinatario: onboardingData.destinatario || null,
+                especificaciones: onboardingData.especificaciones || null,
+                estado: "Pendiente",
             });
             setMessage({ type: "success", text: "Proceso de onboarding iniciado. Se ha notificado al jefe de área." });
-            setOnboardingData({ usuario_id: "", jefe_id: "" });
+            setOnboardingData({ id_empleado: "", destinatario: "", fecha_fin: "", especificaciones: "" });
             setTimeout(() => setShowOnboarding(false), 3000);
         } catch (error: any) {
             setMessage({ type: "error", text: error.message || "Error al iniciar onboarding" });
@@ -73,16 +81,26 @@ export function RRHHDashboard() {
                             />
                         </div>
                         <div className="form-group">
+                            <label>Nombre Completo</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.nombre}
+                                onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                placeholder="Ej: Ana Pérez"
+                            />
+                        </div>
+                        <div className="form-group">
                             <label>Rol en el Sistema</label>
                             <select
                                 value={formData.rol}
                                 onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
                                 className="form-select"
                             >
-                                <option value="usuario comun">Usuario Común (Nuevo Ingreso)</option>
-                                <option value="jefe de area">Jefe de Área</option>
-                                <option value="jefe de inventario">Jefe de Inventario</option>
-                                <option value="recursos humanos">Recursos Humanos</option>
+                                <option value="Operador">Usuario Común (Nuevo Ingreso)</option>
+                                <option value="Jefe de Area">Jefe de Área</option>
+                                <option value="Jefe de Inventario">Jefe de Inventario</option>
+                                <option value="Recursos Humanos">Recursos Humanos</option>
                             </select>
                         </div>
 
@@ -113,19 +131,37 @@ export function RRHHDashboard() {
                             <input
                                 type="number"
                                 required
-                                value={onboardingData.usuario_id}
-                                onChange={(e) => setOnboardingData({ ...onboardingData, usuario_id: e.target.value })}
+                                value={onboardingData.id_empleado}
+                                onChange={(e) => setOnboardingData({ ...onboardingData, id_empleado: e.target.value })}
                                 placeholder="Ej: 15"
                             />
                         </div>
                         <div className="form-group">
-                            <label>ID del Jefe de Área</label>
+                            <label>Destinatario (Jefe/Área)</label>
                             <input
-                                type="number"
+                                type="text"
                                 required
-                                value={onboardingData.jefe_id}
-                                onChange={(e) => setOnboardingData({ ...onboardingData, jefe_id: e.target.value })}
-                                placeholder="Ej: 2"
+                                value={onboardingData.destinatario}
+                                onChange={(e) => setOnboardingData({ ...onboardingData, destinatario: e.target.value })}
+                                placeholder="Ej: Jefe de Operaciones"
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Fecha Fin del Proceso</label>
+                            <input
+                                type="date"
+                                required
+                                value={onboardingData.fecha_fin}
+                                onChange={(e) => setOnboardingData({ ...onboardingData, fecha_fin: e.target.value })}
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Especificaciones (Opcional)</label>
+                            <input
+                                type="text"
+                                value={onboardingData.especificaciones}
+                                onChange={(e) => setOnboardingData({ ...onboardingData, especificaciones: e.target.value })}
+                                placeholder="Ej: Laptop, uniforme, inducción de seguridad"
                             />
                         </div>
 

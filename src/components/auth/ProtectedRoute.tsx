@@ -30,6 +30,6 @@ export function ProtectedRoute() {
  */
 export function checkRole(usuario: any, ...rolesPermitidos: string[]) {
     if (!usuario) return false;
-    const rolUser = usuario.rol.toLowerCase();
+    const rolUser = (usuario.rol ?? "").toLowerCase();
     return rolesPermitidos.some(role => rolUser.includes(role.toLowerCase()));
 }

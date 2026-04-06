@@ -7,7 +7,6 @@ import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { User } from "@/types/auth";
 import { authService } from "@/services/authService";
-import { API_BASE_URL } from "@/config/env";
 
 interface AuthContextType {
   token: string | null;
@@ -31,24 +30,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const storedToken = authService.getToken();
       if (storedToken) {
         try {
-          // Intentamos obtener el usuario actual desde /me
-          const response = await fetch(`${API_BASE_URL}/v1/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            setUsuario(data);
-          } else {
-            // Si el token no es válido, cerramos sesión
-            authService.logout();
-            setToken(null);
-            setUsuario(null);
-          }
+          const data = await authService.getMe();
+          setUsuario(data);
         } catch (error) {
           console.error("Error cargando perfil:", error);
+          authService.logout();
+          setToken(null);
+          setUsuario(null);
         }
       }
       setIsLoading(false);
@@ -61,8 +49,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     try {
       const response = await authService.login({ correo, contrasena });
-      setToken(response.token);
-      setUsuario(response.usuario);
+      setToken(response.access_token);
+      setUsuario(response.user);
     } catch (error) {
       console.error("Error en login:", error);
       throw error;

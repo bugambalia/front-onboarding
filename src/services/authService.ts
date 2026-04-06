@@ -40,9 +40,9 @@ class AuthService {
       const data: LoginResponse = await response.json();
       console.log("Login exitoso");
 
-      // Guardar token en localStorage
-      if (data.token) {
-        localStorage.setItem("access_token", data.token);
+      // Guardar token JWT en localStorage
+      if (data.access_token) {
+        localStorage.setItem("access_token", data.access_token);
       }
 
       return data;
@@ -75,7 +75,12 @@ class AuthService {
    * Registra un nuevo colaborador (RRHH)
    * POST /v1/auth/signup
    */
-  async signup(data: { correo: string; rol: string }): Promise<void> {
+  async signup(data: {
+    correo: string;
+    nombre: string;
+    rol?: string;
+    cargo?: number;
+  }): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/v1/auth/signup`, {
       method: "POST",
       headers: {
@@ -85,7 +90,7 @@ class AuthService {
       body: JSON.stringify(data),
     });
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.detail || "Error registrando usuario");
     }
   }

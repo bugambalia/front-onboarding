@@ -28,7 +28,7 @@ export function ActivatePasswordPage() {
             const response = await fetch(`${API_BASE_URL}/v1/auth/activate-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token, password }),
+                body: JSON.stringify({ token, contrasena: password }),
             });
 
             if (!response.ok) {

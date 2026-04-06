@@ -3,22 +3,33 @@
  * Tipos de datos para el proceso de onboarding y dotación
  */
 
-export interface OnboardingRequest {
-    id: number;
-    usuario_id: number;
-    jefe_id: number;
-    estado: OnboardingStatus;
-    fecha_inicio: string;
-    puesto_id?: number | string;
-    puesto_asignado?: string;
-    dotacion_id?: number;
+export type OnboardingStatus = "Pendiente" | "En proceso" | "Finalizado";
+
+export interface OnboardingCreateRequest {
+    id_empleado: number;
+    fecha_fin: string;
+    destinatario?: string | null;
+    especificaciones?: string | null;
+    estado?: OnboardingStatus;
 }
 
-export type OnboardingStatus =
-    | 'creado'                // Recién creado por RRHH
-    | 'dotacion_enviada'      // Jefe de área envió su parte
-    | 'activo'                // Inventario asignó puesto, el usuario puede verlo
-    | 'completado';           // Finalizado por el usuario
+export interface OnboardingResponse {
+    id: number;
+    id_empleado: number;
+    fecha_creacion: string;
+    fecha_fin?: string | null;
+    estado: OnboardingStatus;
+    especificaciones?: string | null;
+    destinatario?: string | null;
+    aviso?: string | null;
+}
+
+export interface OnboardingUpdateRequest {
+    fecha_fin?: string | null;
+    destinatario?: string | null;
+    especificaciones?: string | null;
+    estado?: OnboardingStatus | null;
+}
 
 export interface DotacionRequest {
     laptops?: string[];

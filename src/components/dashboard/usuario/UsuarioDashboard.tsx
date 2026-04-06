@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
-import type { OnboardingRequest } from "@/types/onboarding";
+import type { OnboardingResponse } from "@/types/onboarding";
 
 export function UsuarioDashboard() {
     const { usuario } = useAuth();
-    const [miOnboarding, setMiOnboarding] = useState<OnboardingRequest | null>(null);
+    const [miOnboarding, setMiOnboarding] = useState<OnboardingResponse | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -25,8 +25,8 @@ export function UsuarioDashboard() {
     const handleFinalizar = async () => {
         if (!miOnboarding) return;
         try {
-            await onboardingService.updateStatus(miOnboarding.id, { estado: "completado" });
-            setMiOnboarding({ ...miOnboarding, estado: "completado" });
+            const updated = await onboardingService.updateStatus(miOnboarding.id, { estado: "Finalizado" });
+            setMiOnboarding(updated);
         } catch (error) {
             alert("Error al finalizar el proceso");
         }
@@ -47,10 +47,9 @@ export function UsuarioDashboard() {
 
     const getProgress = (estado: string) => {
         switch (estado) {
-            case "creado": return 25;
-            case "dotacion_enviada": return 60;
-            case "activo": return 90;
-            case "completado": return 100;
+            case "Pendiente": return 30;
+            case "En proceso": return 70;
+            case "Finalizado": return 100;
             default: return 0;
         }
     };
@@ -74,27 +73,30 @@ export function UsuarioDashboard() {
                     <p className="progress-percentage">{getProgress(miOnboarding.estado)}% Completado</p>
 
                     <div className="user-details">
-                        <p><strong>Estado Actual:</strong> <span className="badge badge-info">{miOnboarding.estado.replace("_", " ")}</span></p>
-                        <p><strong>Fecha Inicio:</strong> {new Date(miOnboarding.fecha_inicio).toLocaleDateString()}</p>
+                        <p><strong>Estado Actual:</strong> <span className="badge badge-info">{miOnboarding.estado}</span></p>
+                        <p><strong>Fecha Inicio:</strong> {new Date(miOnboarding.fecha_creacion).toLocaleDateString()}</p>
+                        {miOnboarding.fecha_fin && (
+                            <p><strong>Fecha Fin:</strong> {new Date(miOnboarding.fecha_fin).toLocaleDateString()}</p>
+                        )}
                     </div>
 
-                    {miOnboarding.estado === "activo" && (
+                    {miOnboarding.estado === "En proceso" && (
                         <button className="btn-primary btn-finalize" onClick={handleFinalizar}>
                             Finalizar Mi Onboarding
                         </button>
                     )}
-                    {miOnboarding.estado === "completado" && (
+                    {miOnboarding.estado === "Finalizado" && (
                         <div className="message-banner success">🎉 ¡Integración completada exitosamente!</div>
                     )}
                 </section>
 
                 <section className="dashboard-card info-card">
                     <h3>Tu Estación de Trabajo</h3>
-                    {(miOnboarding.puesto_id || miOnboarding.puesto_asignado) ? (
+                    {(miOnboarding.destinatario || miOnboarding.especificaciones) ? (
                         <div className="workstation-placeholder">
                             <span className="workstation-icon">💻</span>
-                            <p className="workstation-id">Estación {miOnboarding.puesto_id || miOnboarding.puesto_asignado}</p>
-                            <p className="helper-text">Ubicada en el área de desarrollo, piso 2.</p>
+                            <p className="workstation-id">Asignado a: {miOnboarding.destinatario || "Por confirmar"}</p>
+                            <p className="helper-text">{miOnboarding.especificaciones || "Especificaciones pendientes de confirmación."}</p>
                         </div>
                     ) : (
                         <div className="workstation-placeholder">
