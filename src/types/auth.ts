@@ -38,3 +38,10 @@ export interface SignupRequest {
   rol?: string;
   cargo?: number;
 }
+
+export interface CargoJerarquia {
+  id: number;
+  nombre_cargo: string;
+  area: string;
+  id_jefe_inmediato?: number | null;
+}

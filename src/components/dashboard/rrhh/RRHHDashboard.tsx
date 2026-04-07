@@ -8,13 +8,16 @@ import type {
     OnboardingResponse,
     OnboardingStatus,
 } from "@/types/onboarding";
+import type { CargoJerarquia } from "@/types/auth";
 
 export function RRHHDashboard() {
     const { usuario } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [currentView, setCurrentView] = useState<"home" | "signup" | "onboarding" | "solicitudes" | "dotacion">("home");
-    const [formData, setFormData] = useState({ correo: "", nombre: "", rol: "Operador" });
+    const [formData, setFormData] = useState({ correo: "", nombre: "", cargoId: "" });
+    const [cargos, setCargos] = useState<CargoJerarquia[]>([]);
+    const [loadingCargos, setLoadingCargos] = useState(false);
     const [onboardingData, setOnboardingData] = useState({
         id_empleado: "",
         destinatario: "",
@@ -94,6 +97,25 @@ export function RRHHDashboard() {
 
         setCurrentView("home");
     }, [location.pathname, location.search]);
+
+    useEffect(() => {
+        const loadCargos = async () => {
+            if (cargos.length > 0) return;
+            setLoadingCargos(true);
+            try {
+                const data = await authService.getCargos();
+                setCargos(data);
+            } catch (error: any) {
+                setMessage({ type: "error", text: error.message || "Error cargando cargos" });
+            } finally {
+                setLoadingCargos(false);
+            }
+        };
+
+        if (currentView === "signup") {
+            loadCargos();
+        }
+    }, [currentView]);
 
     const loadSolicitudes = async (selectedScope = scope) => {
         setLoadingSolicitudes(true);
@@ -201,13 +223,24 @@ export function RRHHDashboard() {
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
+        const cargoSeleccionado = cargos.find((cargo) => cargo.id === Number(formData.cargoId));
+        if (!cargoSeleccionado) {
+            setMessage({ type: "error", text: "Debes seleccionar un cargo válido." });
+            return;
+        }
+
         setLoading(true);
         setMessage({ type: "", text: "" });
 
         try {
-            await authService.signup(formData);
+            await authService.signup({
+                correo: formData.correo,
+                nombre: formData.nombre,
+                rol: cargoSeleccionado.nombre_cargo,
+                cargo: cargoSeleccionado.id,
+            });
             setMessage({ type: "success", text: "Usuario registrado con éxito. Se ha enviado un correo para activar la contraseña." });
-            setFormData({ correo: "", nombre: "", rol: "Operador" });
+            setFormData({ correo: "", nombre: "", cargoId: "" });
             setTimeout(() => navigate("/home"), 2000);
         } catch (error: any) {
             setMessage({ type: "error", text: error.message || "Error al registrar usuario" });
@@ -273,18 +306,37 @@ export function RRHHDashboard() {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Rol en el Sistema</label>
+                            <label>Cargo (Jerarquía)</label>
                             <select
-                                value={formData.rol}
-                                onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+                                value={formData.cargoId}
+                                onChange={(e) => setFormData({ ...formData, cargoId: e.target.value })}
                                 className="form-select"
+                                required
+                                disabled={loadingCargos}
                             >
-                                <option value="Operador">Usuario Común (Nuevo Ingreso)</option>
-                                <option value="Jefe de Area">Jefe de Área</option>
-                                <option value="Jefe de Inventario">Jefe de Inventario</option>
-                                <option value="Recursos Humanos">Recursos Humanos</option>
+                                <option value="">{loadingCargos ? "Cargando cargos..." : "Selecciona un cargo"}</option>
+                                {cargos.map((cargo) => (
+                                    <option key={cargo.id} value={String(cargo.id)}>
+                                        {cargo.id} - {cargo.nombre_cargo} ({cargo.area})
+                                    </option>
+                                ))}
                             </select>
                         </div>
+
+                        {formData.cargoId && (() => {
+                            const cargoSeleccionado = cargos.find((cargo) => cargo.id === Number(formData.cargoId));
+                            if (!cargoSeleccionado) return null;
+                            return (
+                                <div className="form-group">
+                                    <label>Rol derivado del cargo</label>
+                                    <input
+                                        type="text"
+                                        value={cargoSeleccionado.nombre_cargo}
+                                        readOnly
+                                    />
+                                </div>
+                            );
+                        })()}
 
                         {message.text && (
                             <div className={`message-banner ${message.type}`}>

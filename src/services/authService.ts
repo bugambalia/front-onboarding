@@ -3,7 +3,7 @@
  * Maneja login, logout y gestión de token
  */
 
-import type { LoginRequest, LoginResponse, User } from "@/types/auth";
+import type { CargoJerarquia, LoginRequest, LoginResponse, SignupRequest, User } from "@/types/auth";
 import { API_BASE_URL } from "@/config/env";
 
 const AUTH_ENDPOINTS = {
@@ -75,12 +75,7 @@ class AuthService {
    * Registra un nuevo colaborador (RRHH)
    * POST /v1/auth/signup
    */
-  async signup(data: {
-    correo: string;
-    nombre: string;
-    rol?: string;
-    cargo?: number;
-  }): Promise<void> {
+  async signup(data: SignupRequest): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/v1/auth/signup`, {
       method: "POST",
       headers: {
@@ -99,7 +94,7 @@ class AuthService {
    * Obtiene la lista de cargos (puestos)
    * GET /v1/auth/cargos
    */
-  async getCargos(): Promise<{ id: number; nombre: string }[]> {
+  async getCargos(): Promise<CargoJerarquia[]> {
     const response = await fetch(`${API_BASE_URL}/v1/auth/cargos`, {
       headers: {
         Authorization: `Bearer ${this.getToken()}`,
