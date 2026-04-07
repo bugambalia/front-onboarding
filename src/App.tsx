@@ -24,6 +24,8 @@ function AppContent() {
         {/* Rutas Protegidas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<HomePage />} />
+          <Route path="/home/mis-solicitudes" element={<HomePage />} />
+          <Route path="/home/encargado" element={<HomePage />} />
           <Route path="/home/oficinas" element={<HomePage />} />
           <Route path="/home/rrhh/signup" element={<HomePage />} />
           <Route path="/home/rrhh/onboarding" element={<HomePage />} />

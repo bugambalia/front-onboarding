@@ -5,6 +5,7 @@ import { JefeDashboard } from "@/components/dashboard/jefe/JefeDashboard";
 import { UsuarioDashboard } from "@/components/dashboard/usuario/UsuarioDashboard";
 import { InventarioDashboard } from "@/components/dashboard/inventario/InventarioDashboard";
 import { OficinasDashboard } from "@/components/dashboard/oficinas/OficinasDashboard";
+import { EncargadoDashboard } from "@/components/dashboard/encargado/EncargadoDashboard";
 import { useLocation } from "react-router-dom";
 
 export function HomePage() {
@@ -30,6 +31,13 @@ export function HomePage() {
     const cargo = Number(usuario.cargo);
     const isRrhhByCargo = cargo === 1 || cargo === 48 || cargo === 49;
     const isOfficeManager = cargo === 4;
+    if (location.pathname === "/home/encargado") {
+      return <EncargadoDashboard />;
+    }
+
+    if (location.pathname === "/home/mis-solicitudes") {
+      return <EncargadoDashboard />;
+    }
 
     if (location.pathname === "/home/oficinas" || isOfficeManager) {
       return <OficinasDashboard />;

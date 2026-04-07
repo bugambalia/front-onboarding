@@ -27,6 +27,54 @@
   gap: 1rem;
 }
 
+.header-actions {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.menu-toggle {
+  display: none;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  padding: 0.65rem;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.menu-toggle.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu-toggle.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.header-menu {
+  display: flex;
+  align-items: center;
+}
+
 .user-info {
   color: #e0e0e0;
 }
@@ -46,6 +94,11 @@
 .btn-login:hover,
 .btn-logout:hover {
   background-color: #218838;
+}
+
+.header-menu .header-nav {
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 /* Login Page */
@@ -107,6 +160,65 @@
 .login-box>p {
   margin: 0 0 2rem 0;
   color: #666;
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+
+  .header-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
+    z-index: 30;
+    width: min(92vw, 340px);
+    padding: 0.75rem;
+    background: #ffffff;
+    border: 1px solid #dbe4f0;
+    border-radius: 18px;
+    box-shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
+  }
+
+  .header-menu.open {
+    display: block;
+  }
+
+  .header-menu .header-nav {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+  }
+
+  .header-menu .btn-small,
+  .header-menu .btn-logout,
+  .header-menu .user-info {
+    width: 100%;
+  }
+
+  .header-menu .user-info {
+    color: #1f2f46;
+    background: #f4f7fb;
+    text-align: center;
+  }
+
+  .header-menu .btn-small,
+  .header-menu .btn-logout {
+    width: 100%;
+    justify-content: center;
+    background: #f7fafc;
+    color: #1f2f46;
+    border: 1px solid #d7e0ec;
+  }
+
+  .header-menu .btn-logout {
+    background: #1B365D;
+    color: white;
+  }
   font-size: 0.95rem;
 }
 
@@ -762,5 +874,242 @@ main {
   .btn-primary,
   .btn-secondary {
     width: 100%;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dashboard-container,
+  .app-layout,
+  main {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.75rem;
+  }
+
+  .dashboard-card,
+  .recent-activity,
+  .dashboard-header {
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .app-header {
+    padding: 1rem 1.25rem;
+  }
+
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.9rem;
+  }
+
+  .header-nav {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .dashboard-container {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .dashboard-header {
+    padding: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.9rem;
+  }
+
+  .stats-row {
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions > * {
+    flex: 1 1 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .login-left-section {
+    flex: none;
+    min-height: 24vh;
+    padding: 1.5rem;
+  }
+
+  .login-left-section h2 {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .login-left-section p {
+    font-size: 1rem;
+    max-width: 100%;
+  }
+
+  .login-right-section {
+    padding: 1rem;
+  }
+
+  .login-box {
+    padding: 1.5rem;
+    border-radius: 14px;
+  }
+
+  .dashboard-container,
+  .app-layout,
+  main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .dashboard-container {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-card,
+  .recent-activity,
+  .dashboard-header {
+    padding: 1rem;
+  }
+
+  .dashboard-card:hover {
+    transform: none;
+  }
+
+  .dashboard-card h3,
+  .recent-activity h3,
+  .team-list-section h3 {
+    font-size: 1.1rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .dashboard-header p {
+    font-size: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.1rem;
+  }
+
+  .form-group input,
+  .form-select {
+    padding: 0.82rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .form-actions > * {
+    width: 100%;
+    flex: none;
+  }
+
+  .dashboard-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    border-radius: 12px;
+  }
+
+  .dashboard-table th,
+  .dashboard-table td {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .activity-item {
+    gap: 0.75rem;
+    padding: 0.85rem 0;
+  }
+
+  .help-links {
+    gap: 0.6rem;
+  }
+
+  .workstation-placeholder {
+    padding: 1.1rem;
+  }
+
+  .workstation-icon {
+    font-size: 2.5rem;
+  }
+
+  .workstation-id {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0.9rem 1rem;
+  }
+
+  .app-title {
+    font-size: 1.2rem;
+  }
+
+  .header-menu {
+    width: calc(100vw - 2rem);
+  }
+
+  .user-info {
+    width: 100%;
+  }
+
+  .btn-login,
+  .btn-logout,
+  .btn-primary,
+  .btn-secondary,
+  .btn-small {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .dashboard-card,
+  .recent-activity,
+  .dashboard-header,
+  .login-box {
+    border-radius: 12px;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .badge {
+    padding: 0.22rem 0.6rem;
   }
 }
