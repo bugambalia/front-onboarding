@@ -31,6 +31,29 @@ export interface OnboardingUpdateRequest {
     estado?: OnboardingStatus | null;
 }
 
+export interface OnboardingHistoryResponse {
+    id: number;
+    id_solicitud: number;
+    fecha_cambio: string;
+    tipo_cambio: string;
+    estado_antiguo?: string | null;
+    nuevo_estado?: string | null;
+}
+
+export interface DotacionTemplateRequest {
+    encargado?: string | null;
+    tipo?: string | null;
+    especificacion: string;
+}
+
+export interface DotacionTemplateResponse {
+    id: number;
+    encargado?: string | null;
+    tipo?: string | null;
+    especificacion: string;
+    aviso?: string | null;
+}
+
 export interface DotacionRequest {
     laptops?: string[];
     uniformes?: string[];

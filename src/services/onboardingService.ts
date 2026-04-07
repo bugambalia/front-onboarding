@@ -10,6 +10,9 @@ import type {
     OnboardingResponse,
     OnboardingUpdateRequest,
     DotacionRequest,
+    OnboardingHistoryResponse,
+    DotacionTemplateRequest,
+    DotacionTemplateResponse,
 } from "@/types/onboarding";
 
 const ONBOARDING_ENDPOINTS = {
@@ -22,6 +25,20 @@ const ONBOARDING_ENDPOINTS = {
 };
 
 class OnboardingService {
+        private buildQuery(filters?: {
+            estado?: string;
+            fecha_desde?: string;
+            fecha_hasta?: string;
+        }) {
+            const params = new URLSearchParams();
+            if (filters?.estado) params.set("estado", filters.estado);
+            if (filters?.fecha_desde) params.set("fecha_desde", filters.fecha_desde);
+            if (filters?.fecha_hasta) params.set("fecha_hasta", filters.fecha_hasta);
+
+            const query = params.toString();
+            return query ? `?${query}` : "";
+        }
+
     /**
      * Obtener cabeceras con el token de autorización
      */
@@ -46,8 +63,12 @@ class OnboardingService {
     /**
      * Listar solicitudes de mi equipo (Jefe de Área)
      */
-    async getTeamRequests(): Promise<OnboardingResponse[]> {
-        const response = await fetch(ONBOARDING_ENDPOINTS.EQUIPO, {
+    async getTeamRequests(filters?: {
+        estado?: string;
+        fecha_desde?: string;
+        fecha_hasta?: string;
+    }): Promise<OnboardingResponse[]> {
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.EQUIPO}${this.buildQuery(filters)}`, {
             headers: this.getHeaders(),
         });
         if (!response.ok) throw new Error("Error obteniendo solicitudes del equipo");
@@ -57,11 +78,30 @@ class OnboardingService {
     /**
      * Listar mis solicitudes (Empleado)
      */
-    async getMyRequests(): Promise<OnboardingResponse[]> {
-        const response = await fetch(ONBOARDING_ENDPOINTS.ASIGNADAS, {
+    async getMyRequests(filters?: {
+        estado?: string;
+        fecha_desde?: string;
+        fecha_hasta?: string;
+    }): Promise<OnboardingResponse[]> {
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.ASIGNADAS}${this.buildQuery(filters)}`, {
             headers: this.getHeaders(),
         });
         if (!response.ok) throw new Error("Error obteniendo mis solicitudes");
+        return response.json();
+    }
+
+    /**
+     * Listar solicitudes asignadas (RRHH/Jefes)
+     */
+    async getAssignedRequests(filters?: {
+        estado?: string;
+        fecha_desde?: string;
+        fecha_hasta?: string;
+    }): Promise<OnboardingResponse[]> {
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.ASIGNADAS}${this.buildQuery(filters)}`, {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo solicitudes asignadas");
         return response.json();
     }
 
@@ -112,6 +152,30 @@ class OnboardingService {
             body: JSON.stringify(update),
         });
         if (!response.ok) throw new Error("Error actualizando proceso de onboarding");
+        return response.json();
+    }
+
+    /**
+     * Historial de una solicitud
+     */
+    async getHistory(id: number): Promise<OnboardingHistoryResponse[]> {
+        const response = await fetch(ONBOARDING_ENDPOINTS.HISTORIAL(id), {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo historial de la solicitud");
+        return response.json();
+    }
+
+    /**
+     * Crear plantilla de dotación (RRHH)
+     */
+    async createDotacionTemplate(data: DotacionTemplateRequest): Promise<DotacionTemplateResponse> {
+        const response = await fetch(ONBOARDING_ENDPOINTS.DOTACION, {
+            method: "POST",
+            headers: this.getHeaders(),
+            body: JSON.stringify(data),
+        });
+        if (!response.ok) throw new Error("Error creando plantilla de dotación");
         return response.json();
     }
 }

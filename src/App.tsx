@@ -26,6 +26,8 @@ function AppContent() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/home/rrhh/signup" element={<HomePage />} />
           <Route path="/home/rrhh/onboarding" element={<HomePage />} />
+          <Route path="/home/rrhh/solicitudes" element={<HomePage />} />
+          <Route path="/home/rrhh/dotacion" element={<HomePage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -23,7 +23,7 @@ export function Header() {
     navigate("/");
   };
 
-  const goToHomeView = (view?: "signup" | "onboarding") => {
+  const goToHomeView = (view?: "signup" | "onboarding" | "solicitudes" | "dotacion") => {
     if (view) {
       navigate(`/home/rrhh/${view}`);
       return;
@@ -53,6 +53,12 @@ export function Header() {
                   </button>
                   <button onClick={() => goToHomeView("onboarding")} className="btn-small">
                     Crear Onboarding
+                  </button>
+                  <button onClick={() => goToHomeView("solicitudes")} className="btn-small">
+                    Solicitudes
+                  </button>
+                  <button onClick={() => goToHomeView("dotacion")} className="btn-small">
+                    Dotación
                   </button>
                 </>
               )}
