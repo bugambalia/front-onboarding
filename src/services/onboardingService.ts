@@ -17,6 +17,7 @@ import type {
 
 const ONBOARDING_ENDPOINTS = {
     LISTA: `${API_BASE_URL}/v1/onboarding/`,
+    MIS_SOLICITUDES: `${API_BASE_URL}/v1/onboarding/mis-solicitudes`,
     EQUIPO: `${API_BASE_URL}/v1/onboarding/solicitudes-equipo`,
     ASIGNADAS: `${API_BASE_URL}/v1/onboarding/solicitudes-asignadas`,
     HISTORIAL: (id: number) => `${API_BASE_URL}/v1/onboarding/solicitudes/${id}/historial`,
@@ -86,7 +87,7 @@ class OnboardingService {
         fecha_desde?: string;
         fecha_hasta?: string;
     }): Promise<OnboardingResponse[]> {
-        const response = await fetch(`${ONBOARDING_ENDPOINTS.ASIGNADAS}${this.buildQuery(filters)}`, {
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.MIS_SOLICITUDES}${this.buildQuery(filters)}`, {
             headers: this.getHeaders(),
         });
         if (!response.ok) throw new Error("Error obteniendo mis solicitudes");

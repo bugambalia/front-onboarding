@@ -6,6 +6,7 @@ import { UsuarioDashboard } from "@/components/dashboard/usuario/UsuarioDashboar
 import { InventarioDashboard } from "@/components/dashboard/inventario/InventarioDashboard";
 import { OficinasDashboard } from "@/components/dashboard/oficinas/OficinasDashboard";
 import { EncargadoDashboard } from "@/components/dashboard/encargado/EncargadoDashboard";
+import { EquipoDashboard } from "@/components/dashboard/equipo/EquipoDashboard";
 import { useLocation } from "react-router-dom";
 
 export function HomePage() {
@@ -31,12 +32,19 @@ export function HomePage() {
     const cargo = Number(usuario.cargo);
     const isRrhhByCargo = cargo === 1 || cargo === 48 || cargo === 49;
     const isOfficeManager = cargo === 4;
+    const isJefe = rol === "jefe de area" || rol.includes("jefe");
+    const isRrhh = rol === "recursos humanos" || rol === "rrhh" || isRrhhByCargo;
+
     if (location.pathname === "/home/encargado") {
       return <EncargadoDashboard />;
     }
 
+    if (location.pathname === "/home/equipo") {
+      return <EquipoDashboard />;
+    }
+
     if (location.pathname === "/home/mis-solicitudes") {
-      return <EncargadoDashboard />;
+      return <UsuarioDashboard />;
     }
 
     if (location.pathname === "/home/oficinas" || isOfficeManager) {
@@ -44,21 +52,26 @@ export function HomePage() {
     }
 
     // 1. Prioridad: Recursos Humanos
-    if (rol === "recursos humanos" || rol === "rrhh" || isRrhhByCargo) {
+    if (isRrhh) {
       return <RRHHDashboard />;
     }
 
-    // 2. Prioridad: Inventario
+    // 2. Prioridad: Jefe de Área
+    if (isJefe) {
+      return <JefeDashboard />;
+    }
+
+    // 3. Encargados no-oficinas: ver y finalizar solicitudes asignadas
+    if (rol.includes("inventario") || rol.includes("encargado") || rol.includes("coordinador") || rol.includes("analista")) {
+      return <EncargadoDashboard />;
+    }
+
+    // 4. Inventario legacy (respaldo)
     if (rol.includes("inventario")) {
       return <InventarioDashboard />;
     }
 
-    // 3. Prioridad: Jefe de Área
-    if (rol === "jefe de area" || rol.includes("jefe")) {
-      return <JefeDashboard />;
-    }
-
-    // 4. Default: Usuario Común
+    // 5. Default: Usuario Común
     return <UsuarioDashboard />;
   };
 

@@ -5,6 +5,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import logoEmpresa from "@/assets/images/LogoEmpresa.png";
 
 export function Header() {
   const { isAuthenticated, usuario, logout } = useAuth();
@@ -16,6 +17,7 @@ export function Header() {
   const cargo = Number(usuario?.cargo);
   const isRrhh = rol.includes("recursos humanos") || rol === "rrhh" || cargo === 1 || cargo === 48 || cargo === 49;
   const isOfficeManager = cargo === 4;
+  const isJefe = rol === "jefe de area" || rol.includes("jefe");
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -49,7 +51,10 @@ export function Header() {
   return (
     <header className="app-header">
       <div className="header-content">
-        <h1 className="app-title">Sistema de Inducciones</h1>
+        <div className="header-brand">
+          <img src={logoEmpresa} alt="Logo empresa" className="app-logo" />
+          <h1 className="app-title">Sistema de Inducciones</h1>
+        </div>
 
         <div className="header-actions">
           {isAuthenticated ? (
@@ -76,6 +81,21 @@ export function Header() {
                   {inProtectedArea && (
                     <button onClick={() => { goToHomeView("mis-solicitudes"); closeMenu(); }} className="btn-small">
                       Mis Solicitudes
+                    </button>
+                  )}
+                  {
+                    <button onClick={() => { navigate("/home/equipo"); closeMenu(); }} className="btn-small">
+                      Solicitudes de Equipo
+                    </button>
+                  }
+                  {
+                    <button onClick={() => { navigate("/home/equipo?mode=create"); closeMenu(); }} className="btn-small">
+                      Crear Solicitud Equipo
+                    </button>
+                  }
+                  {inProtectedArea && !isRrhh && !isOfficeManager && !isJefe && (
+                    <button onClick={() => { navigate("/home/encargado"); closeMenu(); }} className="btn-small">
+                      Solicitudes Asignadas
                     </button>
                   )}
                   {inProtectedArea && isRrhh && (

@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
-import type { OnboardingResponse } from "@/types/onboarding";
+import type { OnboardingCreateRequest, OnboardingResponse } from "@/types/onboarding";
 
 export function JefeDashboard() {
     const { usuario } = useAuth();
     const [solicitudes, setSolicitudes] = useState<OnboardingResponse[]>([]);
     const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingResponse | null>(null);
+    const [nuevaSolicitud, setNuevaSolicitud] = useState<OnboardingCreateRequest>({
+        id_empleado: 0,
+        fecha_fin: "",
+        destinatario: "",
+        especificaciones: "",
+        estado: "Pendiente",
+    });
     const [dotacion, setDotacion] = useState({
         laptops: "",
         uniformes: "",
@@ -26,6 +33,38 @@ export function JefeDashboard() {
         };
         fetchData();
     }, []);
+
+    const handleCrearSolicitud = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setMessage({ type: "", text: "" });
+
+        try {
+            await onboardingService.create({
+                id_empleado: Number(nuevaSolicitud.id_empleado),
+                fecha_fin: new Date(nuevaSolicitud.fecha_fin).toISOString(),
+                destinatario: nuevaSolicitud.destinatario || null,
+                especificaciones: nuevaSolicitud.especificaciones || null,
+                estado: "Pendiente",
+            });
+
+            setMessage({ type: "success", text: "Solicitud de nuevo ingreso creada correctamente." });
+            setNuevaSolicitud({
+                id_empleado: 0,
+                fecha_fin: "",
+                destinatario: "",
+                especificaciones: "",
+                estado: "Pendiente",
+            });
+
+            const data = await onboardingService.getTeamRequests({ estado: "Pendiente" });
+            setSolicitudes(data);
+        } catch (error: any) {
+            setMessage({ type: "error", text: error.message || "No fue posible crear la solicitud" });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleConfirmarSolicitud = async (solicitudId: number) => {
         setLoading(true);
@@ -78,6 +117,64 @@ export function JefeDashboard() {
                 <h1>Panel de Jefe de Área</h1>
                 <p>Pendientes de tu equipo, {usuario?.correo}</p>
             </header>
+
+            <section className="dashboard-card signup-section">
+                <h3>Crear Solicitud de Nuevo Ingreso</h3>
+                <p>Registra la solicitud inicial para un colaborador que todavía no ha terminado su proceso de ingreso.</p>
+
+                <form onSubmit={handleCrearSolicitud} className="signup-form">
+                    <div className="form-group">
+                        <label>ID del Empleado</label>
+                        <input
+                            type="number"
+                            required
+                            min="1"
+                            value={nuevaSolicitud.id_empleado}
+                            onChange={(e) => setNuevaSolicitud({ ...nuevaSolicitud, id_empleado: Number(e.target.value) })}
+                            placeholder="Ej: 125"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Fecha Límite</label>
+                        <input
+                            type="date"
+                            required
+                            value={nuevaSolicitud.fecha_fin}
+                            onChange={(e) => setNuevaSolicitud({ ...nuevaSolicitud, fecha_fin: e.target.value })}
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Destinatario</label>
+                        <input
+                            type="text"
+                            value={nuevaSolicitud.destinatario ?? ""}
+                            onChange={(e) => setNuevaSolicitud({ ...nuevaSolicitud, destinatario: e.target.value })}
+                            placeholder="Ej: Jefatura Comercial"
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Especificaciones</label>
+                        <textarea
+                            rows={4}
+                            value={nuevaSolicitud.especificaciones ?? ""}
+                            onChange={(e) => setNuevaSolicitud({ ...nuevaSolicitud, especificaciones: e.target.value })}
+                            placeholder="Ej: Ingreso para puesto de analista, requiere laptop, credencial y acceso a sistemas"
+                        />
+                    </div>
+
+                    {message.text && (
+                        <div className={`message-banner ${message.type}`}>
+                            {message.text}
+                        </div>
+                    )}
+
+                    <div className="form-actions">
+                        <button type="submit" className="btn-primary" disabled={loading}>
+                            {loading ? "Creando..." : "Crear Solicitud"}
+                        </button>
+                    </div>
+                </form>
+            </section>
 
             {selectedSolicitud ? (
                 <section className="dashboard-card signup-section">

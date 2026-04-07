@@ -469,33 +469,35 @@ export function RRHHDashboard() {
                             {solicitudes.length === 0 ? (
                                 <p className="helper-text">No hay solicitudes para los filtros seleccionados.</p>
                             ) : (
-                                <table className="dashboard-table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Empleado</th>
-                                            <th>Estado</th>
-                                            <th>Creación</th>
-                                            <th>Destinatario</th>
-                                            <th>Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {solicitudes.map((solicitud) => (
-                                            <tr key={solicitud.id}>
-                                                <td>#{solicitud.id}</td>
-                                                <td>{solicitud.id_empleado}</td>
-                                                <td><span className="badge badge-warning">{solicitud.estado}</span></td>
-                                                <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
-                                                <td>{solicitud.destinatario || "—"}</td>
-                                                <td>
-                                                    <button className="btn-small" onClick={() => handleSelectSolicitud(solicitud)}>Editar</button>
-                                                    <button className="btn-small" onClick={() => handleLoadHistory(solicitud.id)} style={{ marginLeft: "0.5rem" }}>Historial</button>
-                                                </td>
+                                <div className="table-wrapper">
+                                    <table className="dashboard-table">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Empleado</th>
+                                                <th>Estado</th>
+                                                <th>Creación</th>
+                                                <th>Destinatario</th>
+                                                <th>Acciones</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {solicitudes.map((solicitud) => (
+                                                <tr key={solicitud.id}>
+                                                    <td>#{solicitud.id}</td>
+                                                    <td>{solicitud.id_empleado}</td>
+                                                    <td><span className="badge badge-warning">{solicitud.estado}</span></td>
+                                                    <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
+                                                    <td>{solicitud.destinatario || "—"}</td>
+                                                    <td>
+                                                        <button className="btn-small" onClick={() => handleSelectSolicitud(solicitud)}>Editar</button>
+                                                        <button className="btn-small" onClick={() => handleLoadHistory(solicitud.id)} style={{ marginLeft: "0.5rem" }}>Historial</button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             )}
                         </section>
                     </section>
