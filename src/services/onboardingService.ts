@@ -21,6 +21,9 @@ const ONBOARDING_ENDPOINTS = {
     ASIGNADAS: `${API_BASE_URL}/v1/onboarding/solicitudes-asignadas`,
     HISTORIAL: (id: number) => `${API_BASE_URL}/v1/onboarding/solicitudes/${id}/historial`,
     ACTUALIZAR: (id: number) => `${API_BASE_URL}/v1/onboarding/${id}`,
+    ESTADO_SIGUIENTE_SOLICITUD: (id: number) => `${API_BASE_URL}/v1/onboarding/solicitudes/${id}/estado/siguiente`,
+    ESTADO_SIGUIENTE_USUARIO: (id: number) => `${API_BASE_URL}/v1/onboarding/usuarios/${id}/estado-onboarding/siguiente`,
+    RECHAZAR: (id: number) => `${API_BASE_URL}/v1/onboarding/solicitudes/${id}/rechazar`,
     DOTACION: `${API_BASE_URL}/v1/onboarding/dotacion`,
 };
 
@@ -176,6 +179,41 @@ class OnboardingService {
             body: JSON.stringify(data),
         });
         if (!response.ok) throw new Error("Error creando plantilla de dotación");
+        return response.json();
+    }
+
+    /**
+     * Avanzar al siguiente estado por solicitud
+     */
+    async advanceRequestState(solicitudId: number): Promise<OnboardingResponse> {
+        const response = await fetch(ONBOARDING_ENDPOINTS.ESTADO_SIGUIENTE_SOLICITUD(solicitudId), {
+            method: "POST",
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error avanzando estado de la solicitud");
+        return response.json();
+    }
+
+    /**
+     * Avanzar al siguiente estado por usuario
+     */
+    async advanceUserState(usuarioId: number): Promise<void> {
+        const response = await fetch(ONBOARDING_ENDPOINTS.ESTADO_SIGUIENTE_USUARIO(usuarioId), {
+            method: "POST",
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error avanzando estado de onboarding del usuario");
+    }
+
+    /**
+     * Rechazar solicitud
+     */
+    async rejectRequest(solicitudId: number): Promise<OnboardingResponse> {
+        const response = await fetch(ONBOARDING_ENDPOINTS.RECHAZAR(solicitudId), {
+            method: "POST",
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error rechazando solicitud");
         return response.json();
     }
 }

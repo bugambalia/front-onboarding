@@ -3,7 +3,7 @@
  * Tipos de datos para el proceso de onboarding y dotación
  */
 
-export type OnboardingStatus = "Pendiente" | "En proceso" | "Finalizado";
+export type OnboardingStatus = "Pendiente" | "En proceso" | "Finalizado" | "Rechazado";
 
 export interface OnboardingCreateRequest {
     id_empleado: number;

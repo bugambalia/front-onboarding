@@ -23,10 +23,13 @@ export function UsuarioDashboard() {
     }, []);
 
     const handleFinalizar = async () => {
-        if (!miOnboarding) return;
+        if (!miOnboarding || !usuario) return;
         try {
-            const updated = await onboardingService.updateStatus(miOnboarding.id, { estado: "Finalizado" });
-            setMiOnboarding(updated);
+            await onboardingService.advanceUserState(usuario.id);
+            const data = await onboardingService.getMyRequests();
+            if (data.length > 0) {
+                setMiOnboarding(data[0]);
+            }
         } catch (error) {
             alert("Error al finalizar el proceso");
         }

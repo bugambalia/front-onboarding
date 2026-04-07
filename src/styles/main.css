@@ -553,3 +553,214 @@ main {
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
+
+/* --- UI Polish Layer --- */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.app-title {
+  letter-spacing: 0.02em;
+  font-weight: 700;
+}
+
+.user-info {
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+}
+
+.btn-login,
+.btn-logout,
+.btn-primary,
+.btn-secondary,
+.btn-small {
+  border-radius: 10px;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-login:hover,
+.btn-logout:hover,
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover,
+.btn-small:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(27, 54, 93, 0.15);
+}
+
+.btn-primary {
+  box-shadow: 0 6px 12px rgba(27, 54, 93, 0.2);
+}
+
+.btn-primary:disabled,
+.btn-small:disabled,
+.btn-secondary:disabled {
+  transform: none;
+  box-shadow: none;
+}
+
+.login-left-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.login-left-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.16), transparent 45%),
+              radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.12), transparent 40%);
+  pointer-events: none;
+}
+
+.login-box {
+  border: 1px solid #e7edf5;
+  box-shadow: 0 16px 36px rgba(17, 24, 39, 0.09);
+}
+
+.dashboard-container {
+  max-width: 1280px;
+}
+
+.dashboard-header {
+  background: white;
+  border: 1px solid #e8eef7;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.dashboard-card,
+.recent-activity {
+  border: 1px solid #e8eef7;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+}
+
+.dashboard-card h3,
+.recent-activity h3,
+.team-list-section h3 {
+  color: #1f2f46;
+}
+
+.form-group input,
+.form-select {
+  border-radius: 10px;
+  border-color: #d7e0ec;
+  background-color: #fcfdff;
+}
+
+.form-group input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(27, 54, 93, 0.15);
+}
+
+.form-actions {
+  flex-wrap: wrap;
+}
+
+.message-banner {
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.dashboard-table {
+  border: 1px solid #e6edf7;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+  vertical-align: middle;
+}
+
+.dashboard-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.badge {
+  letter-spacing: 0.02em;
+}
+
+.activity-item {
+  align-items: flex-start;
+}
+
+.activity-dot {
+  margin-top: 0.35rem;
+}
+
+.workstation-placeholder {
+  border: 1px dashed #d6deeb;
+}
+
+/* Grid specific polish (Oficinas) */
+.dashboard-card .dashboard-table td .btn-small {
+  min-width: 2.2rem;
+  min-height: 2rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.dashboard-card .dashboard-table td .btn-small:disabled {
+  background-color: #fde8e8;
+  border-color: #f5c2c2;
+  color: #9b2c2c;
+}
+
+@media (max-width: 1024px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .header-nav {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .dashboard-header {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content,
+  main {
+    padding: 1rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dashboard-card,
+  .recent-activity {
+    padding: 1rem;
+  }
+
+  .dashboard-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}

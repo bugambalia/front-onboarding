@@ -4,9 +4,12 @@ import { RRHHDashboard } from "@/components/dashboard/rrhh/RRHHDashboard";
 import { JefeDashboard } from "@/components/dashboard/jefe/JefeDashboard";
 import { UsuarioDashboard } from "@/components/dashboard/usuario/UsuarioDashboard";
 import { InventarioDashboard } from "@/components/dashboard/inventario/InventarioDashboard";
+import { OficinasDashboard } from "@/components/dashboard/oficinas/OficinasDashboard";
+import { useLocation } from "react-router-dom";
 
 export function HomePage() {
   const { usuario, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -24,8 +27,13 @@ export function HomePage() {
   // Despacho de componentes basado en el rol con mayor precisión
   const renderDashboard = () => {
     const rol = (usuario.rol ?? "").toLowerCase().trim();
-    const cargo = usuario.cargo;
+    const cargo = Number(usuario.cargo);
     const isRrhhByCargo = cargo === 1 || cargo === 48 || cargo === 49;
+    const isOfficeManager = cargo === 4;
+
+    if (location.pathname === "/home/oficinas" || isOfficeManager) {
+      return <OficinasDashboard />;
+    }
 
     // 1. Prioridad: Recursos Humanos
     if (rol === "recursos humanos" || rol === "rrhh" || isRrhhByCargo) {

@@ -18,7 +18,7 @@ export function JefeDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await onboardingService.getTeamRequests();
+                const data = await onboardingService.getTeamRequests({ estado: "Pendiente" });
                 setSolicitudes(data);
             } catch (error) {
                 console.error("Error cargando solicitudes del equipo:", error);
@@ -26,6 +26,25 @@ export function JefeDashboard() {
         };
         fetchData();
     }, []);
+
+    const handleConfirmarSolicitud = async (solicitudId: number) => {
+        setLoading(true);
+        setMessage({ type: "", text: "" });
+
+        try {
+            const updated = await onboardingService.advanceRequestState(solicitudId);
+            if (updated.estado !== "Pendiente") {
+                setSolicitudes((prev) => prev.filter((item) => item.id !== solicitudId));
+            } else {
+                setSolicitudes((prev) => prev.map((item) => (item.id === solicitudId ? updated : item)));
+            }
+            setMessage({ type: "success", text: `Solicitud #${solicitudId} confirmada (Pendiente → En proceso).` });
+        } catch (error: any) {
+            setMessage({ type: "error", text: error.message || "No fue posible confirmar la solicitud" });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleDotacionSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -112,18 +131,23 @@ export function JefeDashboard() {
                 <>
                     <div className="dashboard-grid">
                         <section className="dashboard-card status-card">
-                            <h3>Onboardings Pendientes</h3>
+                            <h3>Solicitudes Pendientes</h3>
                             <div className="stats-row">
                                 <div className="stat-item">
                                     <span className="stat-value">{solicitudes.length}</span>
-                                    <span className="stat-label">Nuevos ingresos</span>
+                                    <span className="stat-label">Por confirmar</span>
                                 </div>
                             </div>
                         </section>
                     </div>
 
                     <section className="team-list-section">
-                        <h3>Procesos de Ingreso del Equipo</h3>
+                        <h3>Solicitudes Pendientes de tu Equipo</h3>
+                        {message.text && (
+                            <div className={`message-banner ${message.type}`}>
+                                {message.text}
+                            </div>
+                        )}
                         {solicitudes.length === 0 ? (
                             <p className="helper-text">No hay procesos de onboarding pendientes en tu área.</p>
                         ) : (
@@ -147,7 +171,15 @@ export function JefeDashboard() {
                                             <td>
                                                 <button
                                                     className="btn-small"
+                                                    onClick={() => handleConfirmarSolicitud(sol.id)}
+                                                    disabled={loading || sol.estado === "Finalizado" || sol.estado === "Rechazado"}
+                                                >
+                                                    Confirmar
+                                                </button>
+                                                <button
+                                                    className="btn-small"
                                                     onClick={() => setSelectedSolicitud(sol)}
+                                                    style={{ marginLeft: "0.5rem" }}
                                                 >
                                                     Gestionar Dotación
                                                 </button>

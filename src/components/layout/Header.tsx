@@ -11,8 +11,9 @@ export function Header() {
   const location = useLocation();
 
   const rol = (usuario?.rol ?? "").toLowerCase();
-  const cargo = usuario?.cargo;
+  const cargo = Number(usuario?.cargo);
   const isRrhh = rol.includes("recursos humanos") || rol === "rrhh" || cargo === 1 || cargo === 48 || cargo === 49;
+  const isOfficeManager = cargo === 4;
 
   const handleLoginClick = () => {
     navigate("/login");
@@ -61,6 +62,11 @@ export function Header() {
                     Dotación
                   </button>
                 </>
+              )}
+              {inProtectedArea && isOfficeManager && (
+                <button onClick={() => navigate("/home/oficinas")} className="btn-small">
+                  Oficinas
+                </button>
               )}
               <span className="user-info">
                 Hola, {usuario?.correo}

@@ -19,6 +19,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function normalizeUser(raw: any): User {
+  const parsedCargo = Number(raw?.cargo ?? raw?.id_cargo ?? raw?.cargo_id);
+
+  return {
+    id: Number(raw?.id ?? 0),
+    correo: String(raw?.correo ?? ""),
+    nombre: String(raw?.nombre ?? raw?.name ?? ""),
+    rol: raw?.rol ?? raw?.nombre_cargo ?? null,
+    cargo: Number.isFinite(parsedCargo) ? parsedCargo : null,
+  };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(authService.getToken());
   const [usuario, setUsuario] = useState<User | null>(null);
@@ -31,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (storedToken) {
         try {
           const data = await authService.getMe();
-          setUsuario(data);
+          setUsuario(normalizeUser(data));
         } catch (error) {
           console.error("Error cargando perfil:", error);
           authService.logout();
@@ -50,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authService.login({ correo, contrasena });
       setToken(response.access_token);
-      setUsuario(response.user);
+      setUsuario(normalizeUser(response.user));
     } catch (error) {
       console.error("Error en login:", error);
       throw error;
