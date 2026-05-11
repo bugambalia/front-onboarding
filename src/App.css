@@ -39,6 +39,13 @@ body {
 	backdrop-filter: blur(8px);
 	background: linear-gradient(90deg, rgba(27, 54, 93, 0.96) 0%, rgba(27, 54, 93, 0.88) 65%, rgba(40, 167, 69, 0.82) 100%);
 	box-shadow: 0 8px 24px rgba(15, 23, 42, 0.16);
+	transition: transform 0.28s ease, box-shadow 0.28s ease;
+	will-change: transform;
+}
+
+.app-header.is-collapsed {
+	transform: translateY(calc(-100% - 8px));
+	box-shadow: none;
 }
 
 .header-content {

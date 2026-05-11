@@ -12,6 +12,7 @@ export function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const rol = (usuario?.rol ?? "").toLowerCase();
   const cargo = Number(usuario?.cargo);
@@ -44,12 +45,48 @@ export function Header() {
 
   useEffect(() => {
     setMenuOpen(false);
+    setIsCollapsed(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    const minScrollDelta = 8;
+    const topOffset = 16;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY <= topOffset) {
+        setIsCollapsed(false);
+        lastScrollY = currentScrollY;
+        return;
+      }
+
+      const delta = currentScrollY - lastScrollY;
+      if (Math.abs(delta) < minScrollDelta) {
+        return;
+      }
+
+      if (delta > 0 && !menuOpen) {
+        setIsCollapsed(true);
+      } else {
+        setIsCollapsed(false);
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [menuOpen]);
 
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <header className="app-header">
+    <header className={`app-header ${isCollapsed ? "is-collapsed" : ""}`}>
       <div className="header-content">
         <div className="header-brand">
           <img src={logoEmpresa} alt="Logo empresa" className="app-logo" />

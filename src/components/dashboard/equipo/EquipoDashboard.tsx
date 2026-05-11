@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
+import { authService } from "@/services/authService";
 import type { OnboardingCreateRequest, OnboardingResponse } from "@/types/onboarding";
+import type { CargoJerarquia } from "@/types/auth";
 import { useLocation } from "react-router-dom";
+import { getEncargadoCargos } from "@/utils/cargoFilters";
 
 export function EquipoDashboard() {
   const { usuario } = useAuth();
@@ -23,6 +26,9 @@ export function EquipoDashboard() {
     estado: "Pendiente",
   });
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [loadingCargos, setLoadingCargos] = useState(false);
+  const [cargos, setCargos] = useState<CargoJerarquia[]>([]);
+  const encargadoCargos = getEncargadoCargos(cargos);
 
   const loadTeamRequests = async (overrides?: {
     estado?: string;
@@ -52,6 +58,22 @@ export function EquipoDashboard() {
 
   useEffect(() => {
     loadTeamRequests();
+  }, []);
+
+  useEffect(() => {
+    const loadCargos = async () => {
+      setLoadingCargos(true);
+      try {
+        const data = await authService.getCargos();
+        setCargos(data);
+      } catch (error) {
+        console.error("Error cargando cargos:", error);
+      } finally {
+        setLoadingCargos(false);
+      }
+    };
+
+    loadCargos();
   }, []);
 
   useEffect(() => {
@@ -156,13 +178,20 @@ export function EquipoDashboard() {
               />
             </div>
             <div className="form-group">
-              <label>Destinatario</label>
-              <input
-                type="text"
+              <label>Destinatario (Encargado)</label>
+              <select
                 value={createData.destinatario ?? ""}
                 onChange={(e) => setCreateData({ ...createData, destinatario: e.target.value })}
-                placeholder="Ej: Jefatura Comercial"
-              />
+                className="form-select"
+                disabled={loadingCargos}
+              >
+                <option value="">{loadingCargos ? "Cargando encargados..." : "Selecciona encargado"}</option>
+                {encargadoCargos.map((cargo) => (
+                  <option key={`equipo-dest-${cargo.id}`} value={cargo.nombre_cargo}>
+                    {cargo.id} - {cargo.nombre_cargo} ({cargo.area})
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label>Especificaciones</label>

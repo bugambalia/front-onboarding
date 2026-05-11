@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
+import { authService } from "@/services/authService";
 import type { OnboardingCreateRequest, OnboardingResponse } from "@/types/onboarding";
+import type { CargoJerarquia } from "@/types/auth";
+import { getEncargadoCargos } from "@/utils/cargoFilters";
 
 export function JefeDashboard() {
     const { usuario } = useAuth();
@@ -20,7 +23,10 @@ export function JefeDashboard() {
         cursos: "",
     });
     const [loading, setLoading] = useState(false);
+    const [loadingCargos, setLoadingCargos] = useState(false);
+    const [cargos, setCargos] = useState<CargoJerarquia[]>([]);
     const [message, setMessage] = useState({ type: "", text: "" });
+    const encargadoCargos = getEncargadoCargos(cargos);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -32,6 +38,22 @@ export function JefeDashboard() {
             }
         };
         fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchCargos = async () => {
+            setLoadingCargos(true);
+            try {
+                const data = await authService.getCargos();
+                setCargos(data);
+            } catch (error) {
+                console.error("Error cargando cargos:", error);
+            } finally {
+                setLoadingCargos(false);
+            }
+        };
+
+        fetchCargos();
     }, []);
 
     const handleCrearSolicitud = async (e: React.FormEvent) => {
@@ -144,13 +166,20 @@ export function JefeDashboard() {
                         />
                     </div>
                     <div className="form-group">
-                        <label>Destinatario</label>
-                        <input
-                            type="text"
+                        <label>Destinatario (Encargado)</label>
+                        <select
                             value={nuevaSolicitud.destinatario ?? ""}
                             onChange={(e) => setNuevaSolicitud({ ...nuevaSolicitud, destinatario: e.target.value })}
-                            placeholder="Ej: Jefatura Comercial"
-                        />
+                            className="form-select"
+                            disabled={loadingCargos}
+                        >
+                            <option value="">{loadingCargos ? "Cargando encargados..." : "Selecciona encargado"}</option>
+                            {encargadoCargos.map((cargo) => (
+                                <option key={`jefe-dest-${cargo.id}`} value={cargo.nombre_cargo}>
+                                    {cargo.id} - {cargo.nombre_cargo} ({cargo.area})
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="form-group">
                         <label>Especificaciones</label>

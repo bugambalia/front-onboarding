@@ -9,6 +9,7 @@ import type {
     OnboardingStatus,
 } from "@/types/onboarding";
 import type { CargoJerarquia } from "@/types/auth";
+import { getEncargadoCargos } from "@/utils/cargoFilters";
 
 export function RRHHDashboard() {
     const { usuario } = useAuth();
@@ -48,6 +49,7 @@ export function RRHHDashboard() {
     const [loadingHistorial, setLoadingHistorial] = useState(false);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
+    const encargadoCargos = getEncargadoCargos(cargos);
 
     useEffect(() => {
         const path = location.pathname;
@@ -112,7 +114,7 @@ export function RRHHDashboard() {
             }
         };
 
-        if (currentView === "signup") {
+        if (["signup", "onboarding", "dotacion", "solicitudes"].includes(currentView)) {
             loadCargos();
         }
     }, [currentView]);
@@ -371,14 +373,21 @@ export function RRHHDashboard() {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Destinatario (Jefe/Área)</label>
-                            <input
-                                type="text"
+                            <label>Destinatario (Encargado)</label>
+                            <select
                                 required
                                 value={onboardingData.destinatario}
                                 onChange={(e) => setOnboardingData({ ...onboardingData, destinatario: e.target.value })}
-                                placeholder="Ej: Jefe de Operaciones"
-                            />
+                                className="form-select"
+                                disabled={loadingCargos}
+                            >
+                                <option value="">{loadingCargos ? "Cargando encargados..." : "Selecciona encargado"}</option>
+                                {encargadoCargos.map((cargo) => (
+                                    <option key={`onboarding-dest-${cargo.id}`} value={cargo.nombre_cargo}>
+                                        {cargo.id} - {cargo.nombre_cargo} ({cargo.area})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div className="form-group">
                             <label>Fecha Fin del Proceso</label>
@@ -519,12 +528,20 @@ export function RRHHDashboard() {
                                     </select>
                                 </div>
                                 <div className="form-group">
-                                    <label>Destinatario</label>
-                                    <input
-                                        type="text"
+                                    <label>Destinatario (Encargado)</label>
+                                    <select
                                         value={editData.destinatario}
                                         onChange={(e) => setEditData({ ...editData, destinatario: e.target.value })}
-                                    />
+                                        className="form-select"
+                                        disabled={loadingCargos}
+                                    >
+                                        <option value="">{loadingCargos ? "Cargando encargados..." : "Selecciona encargado"}</option>
+                                        {encargadoCargos.map((cargo) => (
+                                            <option key={`edit-dest-${cargo.id}`} value={cargo.nombre_cargo}>
+                                                {cargo.id} - {cargo.nombre_cargo} ({cargo.area})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="form-group">
                                     <label>Fecha Fin</label>
@@ -584,12 +601,19 @@ export function RRHHDashboard() {
                     <form onSubmit={handleCreateDotacionTemplate} className="signup-form">
                         <div className="form-group">
                             <label>Encargado (Opcional)</label>
-                            <input
-                                type="text"
+                            <select
                                 value={dotacionTemplateData.encargado}
                                 onChange={(e) => setDotacionTemplateData({ ...dotacionTemplateData, encargado: e.target.value })}
-                                placeholder="Ej: RRHH Central"
-                            />
+                                className="form-select"
+                                disabled={loadingCargos}
+                            >
+                                <option value="">{loadingCargos ? "Cargando encargados..." : "Selecciona encargado"}</option>
+                                {encargadoCargos.map((cargo) => (
+                                    <option key={`dotacion-encargado-${cargo.id}`} value={cargo.nombre_cargo}>
+                                        {cargo.id} - {cargo.nombre_cargo} ({cargo.area})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div className="form-group">
                             <label>Tipo</label>
