@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
 import { authService } from "@/services/authService";
-import type { OnboardingCreateRequest, OnboardingResponse } from "@/types/onboarding";
+import type { OnboardingCreateRequest, OnboardingResponse, DotacionTemplateResponse } from "@/types/onboarding";
 import type { CargoJerarquia } from "@/types/auth";
 import { useLocation } from "react-router-dom";
 import { getEncargadoCargos } from "@/utils/cargoFilters";
@@ -25,6 +25,9 @@ export function EquipoDashboard() {
     especificaciones: "",
     estado: "Pendiente",
   });
+  const [dotacionTemplates, setDotacionTemplates] = useState<DotacionTemplateResponse[]>([]);
+  const [loadingDotacionTemplates, setLoadingDotacionTemplates] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | "">("");
   const [message, setMessage] = useState({ type: "", text: "" });
   const [loadingCargos, setLoadingCargos] = useState(false);
   const [cargos, setCargos] = useState<CargoJerarquia[]>([]);
@@ -77,6 +80,22 @@ export function EquipoDashboard() {
   }, []);
 
   useEffect(() => {
+    const loadDotacionTemplates = async () => {
+      setLoadingDotacionTemplates(true);
+      try {
+        const data = await onboardingService.listDotacionTemplates();
+        setDotacionTemplates(data);
+      } catch (error) {
+        console.error("Error cargando plantillas de dotación:", error);
+      } finally {
+        setLoadingDotacionTemplates(false);
+      }
+    };
+
+    loadDotacionTemplates();
+  }, []);
+
+  useEffect(() => {
     setShowCreateForm(new URLSearchParams(location.search).get("mode") === "create");
   }, [location.search]);
 
@@ -86,11 +105,12 @@ export function EquipoDashboard() {
     setMessage({ type: "", text: "" });
 
     try {
+      const selectedTemplate = dotacionTemplates.find((t) => t.id === Number(selectedTemplateId));
       await onboardingService.create({
         id_empleado: Number(createData.id_empleado),
         fecha_fin: new Date(createData.fecha_fin).toISOString(),
         destinatario: createData.destinatario || null,
-        especificaciones: createData.especificaciones || null,
+        especificaciones: selectedTemplate ? selectedTemplate.especificacion : createData.especificaciones || null,
         estado: "Pendiente",
       });
 
@@ -102,6 +122,7 @@ export function EquipoDashboard() {
         especificaciones: "",
         estado: "Pendiente",
       });
+      setSelectedTemplateId("");
       await loadTeamRequests();
       setShowCreateForm(false);
     } catch (error: any) {
@@ -195,12 +216,20 @@ export function EquipoDashboard() {
             </div>
             <div className="form-group">
               <label>Especificaciones</label>
-              <textarea
-                rows={4}
-                value={createData.especificaciones ?? ""}
-                onChange={(e) => setCreateData({ ...createData, especificaciones: e.target.value })}
-                placeholder="Ej: Laptop, uniforme y accesos a sistemas"
-              />
+              <select
+                required
+                value={selectedTemplateId}
+                onChange={(e) => setSelectedTemplateId(e.target.value ? Number(e.target.value) : "")}
+                className="form-select"
+                disabled={loadingDotacionTemplates}
+              >
+                <option value="">{loadingDotacionTemplates ? "Cargando plantillas..." : "Selecciona especificación"}</option>
+                {dotacionTemplates.map((tpl) => (
+                  <option key={`tpl-${tpl.id}`} value={tpl.id}>
+                    {tpl.id} - {tpl.especificacion}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="form-actions">

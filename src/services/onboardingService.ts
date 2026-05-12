@@ -184,6 +184,17 @@ class OnboardingService {
     }
 
     /**
+     * Listar plantillas de dotación
+     */
+    async listDotacionTemplates(): Promise<DotacionTemplateResponse[]> {
+        const response = await fetch(ONBOARDING_ENDPOINTS.DOTACION, {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo plantillas de dotación");
+        return response.json();
+    }
+
+    /**
      * Avanzar al siguiente estado por solicitud
      */
     async advanceRequestState(solicitudId: number): Promise<OnboardingResponse> {
