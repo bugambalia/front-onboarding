@@ -96,6 +96,19 @@ export function EquipoDashboard() {
   }, []);
 
   useEffect(() => {
+    if (!selectedTemplateId) {
+      // clear destinatario if no template selected
+      setCreateData((prev) => ({ ...prev, destinatario: "" }));
+      return;
+    }
+
+    const tpl = dotacionTemplates.find((t) => t.id === Number(selectedTemplateId));
+    if (tpl && tpl.encargado) {
+      setCreateData((prev) => ({ ...prev, destinatario: tpl.encargado || "" }));
+    }
+  }, [selectedTemplateId, dotacionTemplates]);
+
+  useEffect(() => {
     setShowCreateForm(new URLSearchParams(location.search).get("mode") === "create");
   }, [location.search]);
 
