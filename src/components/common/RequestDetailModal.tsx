@@ -10,16 +10,16 @@ export function RequestDetailModal({ open, solicitud, onClose }: Props) {
   if (!open || !solicitud) return null;
 
   return (
-    <div className="request-detail-overlay" role="dialog" aria-modal="true">
-      <div className="request-detail-dialog">
-        <div className="request-detail-header">
-          <h2>Solicitud #{solicitud.id}</h2>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 2000 }}>
+      <div style={{ background: "#fff", padding: 20, borderRadius: 8, width: "min(900px, 95%)", maxHeight: "90%", overflowY: "auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <h2 style={{ margin: 0 }}>Solicitud #{solicitud.id}</h2>
           <div>
             <button className="btn-small" onClick={onClose}>Cerrar</button>
           </div>
         </div>
 
-        <div className="request-detail-grid">
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div>
             <p><strong>Empleado:</strong> {solicitud.id_empleado}</p>
             <p><strong>Estado:</strong> {solicitud.estado}</p>
@@ -30,7 +30,7 @@ export function RequestDetailModal({ open, solicitud, onClose }: Props) {
           <div>
             <p><strong>Destinatario:</strong> {solicitud.destinatario || "—"}</p>
             <p><strong>Especificaciones:</strong></p>
-            <div className="request-detail-specs">{solicitud.especificaciones || solicitud.aviso || "—"}</div>
+            <div style={{ whiteSpace: "pre-wrap", background: "#f7f7f7", padding: 8, borderRadius: 4 }}>{solicitud.especificaciones || solicitud.aviso || "—"}</div>
           </div>
         </div>
 
