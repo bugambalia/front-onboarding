@@ -34,6 +34,7 @@ export function EquipoDashboard() {
   const [cargos, setCargos] = useState<CargoJerarquia[]>([]);
   const encargadoCargos = getEncargadoCargos(cargos);
   const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
+  const [detailInitialTab, setDetailInitialTab] = useState<"details" | "history">("details");
 
   const loadTeamRequests = async (overrides?: {
     estado?: string;
@@ -339,8 +340,11 @@ export function EquipoDashboard() {
                     <td>{solicitud.destinatario || "—"}</td>
                     <td>{solicitud.especificaciones || solicitud.aviso || "—"}</td>
                     <td>
-                      <button type="button" className="btn-small" onClick={() => setDetailRequest(solicitud)}>
+                      <button type="button" className="btn-small" onClick={() => { setDetailInitialTab("details"); setDetailRequest(solicitud); }}>
                         Ver
+                      </button>
+                      <button type="button" className="btn-small" onClick={() => { setDetailInitialTab("history"); setDetailRequest(solicitud); }} style={{ marginLeft: "0.5rem" }}>
+                        Historial
                       </button>
                       <button
                         type="button"
@@ -360,7 +364,12 @@ export function EquipoDashboard() {
         )}
       </section>
       {detailRequest && (
-        <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+        <RequestDetailModal
+          open={!!detailRequest}
+          solicitud={detailRequest}
+          initialTab={detailInitialTab}
+          onClose={() => { setDetailRequest(null); setDetailInitialTab("details"); }}
+        />
       )}
     </div>
   );

@@ -40,6 +40,7 @@ export function RRHHDashboard() {
     const [solicitudes, setSolicitudes] = useState<OnboardingResponse[]>([]);
     const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingResponse | null>(null);
     const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
+    const [detailInitialTab, setDetailInitialTab] = useState<"details" | "history" | "edit">("details");
     const [editData, setEditData] = useState({
         estado: "Pendiente" as OnboardingStatus,
         destinatario: "",
@@ -503,9 +504,9 @@ export function RRHHDashboard() {
                                                     <td>{solicitud.destinatario || "—"}</td>
                                                     <td>{solicitud.especificaciones || solicitud.aviso || "—"}</td>
                                                     <td>
-                                                        <button className="btn-small" onClick={() => setDetailRequest(solicitud)}>Ver</button>
-                                                        <button className="btn-small" onClick={() => handleSelectSolicitud(solicitud)} style={{ marginLeft: "0.5rem" }}>Editar</button>
-                                                        <button className="btn-small" onClick={() => handleLoadHistory(solicitud.id)} style={{ marginLeft: "0.5rem" }}>Historial</button>
+                                                        <button className="btn-small" onClick={() => { setDetailInitialTab("details"); setDetailRequest(solicitud); }}>Ver</button>
+                                                        <button className="btn-small" onClick={() => { setDetailInitialTab("edit"); setDetailRequest(solicitud); }} style={{ marginLeft: "0.5rem" }}>Editar</button>
+                                                        <button className="btn-small" onClick={() => { setDetailInitialTab("history"); setDetailRequest(solicitud); }} style={{ marginLeft: "0.5rem" }}>Historial</button>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -716,7 +717,21 @@ export function RRHHDashboard() {
                 </ul>
             </section>
             {detailRequest && (
-                <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+                <RequestDetailModal
+                    open={!!detailRequest}
+                    solicitud={detailRequest}
+                    initialTab={detailInitialTab}
+                    onUpdate={(updated) => {
+                        setSolicitudes((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+                        if (selectedSolicitud && selectedSolicitud.id === updated.id) setSelectedSolicitud(updated);
+                        setMessage({ type: "success", text: `Solicitud #${updated.id} actualizada correctamente.` });
+                        // refresh historial for updated
+                        handleLoadHistory(updated.id);
+                        // keep modal showing updated values
+                        setDetailRequest(updated);
+                    }}
+                    onClose={() => setDetailRequest(null)}
+                />
             )}
         </div>
     );
