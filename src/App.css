@@ -294,7 +294,9 @@ body {
 }
 
 .table-wrapper .dashboard-table {
-	min-width: 760px;
+	min-width: 0;
+	width: 100%;
+	table-layout: auto;
 }
 
 .badge {
