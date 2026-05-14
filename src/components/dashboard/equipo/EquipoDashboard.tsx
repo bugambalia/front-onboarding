@@ -162,6 +162,28 @@ export function EquipoDashboard() {
     }
   };
 
+  const splitToChips = (raw?: string | null) => {
+    if (!raw) return [];
+    return raw
+      .split(/\r?\n|,|;/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+  };
+
+  const renderChips = (raw?: string | null) => {
+    const parts = splitToChips(raw);
+    if (parts.length === 0) return <span>—</span>;
+    return (
+      <div className="chips">
+        {parts.map((p, i) => (
+          <span key={i} className="chip" title={p}>
+            {p}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="dashboard-container">
       <header className="dashboard-header">
@@ -336,8 +358,8 @@ export function EquipoDashboard() {
                     <td><span className="badge badge-info">{solicitud.estado}</span></td>
                     <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
                     <td>{solicitud.fecha_fin ? new Date(solicitud.fecha_fin).toLocaleDateString() : "—"}</td>
-                    <td>{solicitud.destinatario || "—"}</td>
-                    <td>{solicitud.especificaciones || solicitud.aviso || "—"}</td>
+                    <td>{renderChips(solicitud.destinatario)}</td>
+                    <td>{renderChips(solicitud.especificaciones || solicitud.aviso)}</td>
                     <td>
                       <button type="button" className="btn-small" onClick={() => setDetailRequest(solicitud)}>
                         Ver
