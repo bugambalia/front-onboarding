@@ -1113,67 +1113,57 @@ main {
     padding: 0.22rem 0.6rem;
   }
 }
-
-/* Responsive table improvements: ensure tables and cells adapt to container */
-.table-wrapper .dashboard-table {
-  min-width: 0 !important;
-  width: 100% !important;
-  table-layout: auto;
-}
-
-.dashboard-table th,
-.dashboard-table td {
-  white-space: normal !important;
-  word-break: break-word !important;
-  overflow-wrap: anywhere !important;
-  max-width: 320px;
-}
-
+/* Responsive table behavior: keep table horizontally scrollable; shrink text on small screens */
 .table-wrapper {
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+.table-wrapper .dashboard-table {
+  min-width: 0 !important;
+  width: auto;
+  table-layout: auto;
+}
+
+/* Desktop/tablet: allow normal wrapping to keep readability */
+.dashboard-table th,
+.dashboard-table td {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: none;
+}
+
+/* Small screens: make table content single-line (no wrap), shrink text to fit and allow horizontal scroll */
 @media (max-width: 900px) {
+  .dashboard-table {
+    width: max-content;
+  }
+
   .dashboard-table th,
   .dashboard-table td {
-    padding: 0.6rem 0.5rem;
-    font-size: 0.92rem;
+    white-space: nowrap !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.5rem;
   }
+
   .dashboard-card .dashboard-table {
     font-size: 0.95rem;
+  }
+}
+
+/* Very small screens: slightly smaller text */
+@media (max-width: 480px) {
+  .dashboard-table th,
+  .dashboard-table td {
+    font-size: 0.8rem;
+    padding: 0.45rem 0.4rem;
   }
 }
 
 /* Ensure dashboard container uses box-sizing so padding doesn't cause overflow */
 .dashboard-container {
   box-sizing: border-box;
-}
-
-/* Chips (cajitas) para especificaciones/destinatario */
-.chips {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.chip {
-  display: inline-block;
-  background: #f1f5fb;
-  color: #1f2f46;
-  padding: 0.28rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid #dbe8fa;
-  font-size: 0.86rem;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-@media (max-width: 480px) {
-  .chip {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.5rem;
-  }
 }

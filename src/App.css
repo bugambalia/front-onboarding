@@ -295,7 +295,7 @@ body {
 
 .table-wrapper .dashboard-table {
 	min-width: 0;
-	width: 100%;
+	width: auto;
 	table-layout: auto;
 }
 
