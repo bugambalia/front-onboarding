@@ -298,6 +298,12 @@ export function RRHHDashboard() {
             <header className="dashboard-header">
                 <h1>Panel de Recursos Humanos</h1>
                 <p>Bienvenido de nuevo, {usuario?.correo}</p>
+                <div className="dashboard-header-actions">
+                    <button className="btn-secondary" onClick={() => navigate("/home/rrhh/solicitudes")}>Solicitudes</button>
+                    <button className="btn-secondary" onClick={() => navigate("/home/rrhh/onboarding")}>Crear Onboarding</button>
+                    <button className="btn-secondary" onClick={() => navigate("/home/rrhh/dotacion")}>Plantillas Dotación</button>
+                    <button className="btn-primary" onClick={() => navigate("/home/rrhh/estadisticas")}>Estadísticas</button>
+                </div>
             </header>
 
             {currentView === "signup" && (
