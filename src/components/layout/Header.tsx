@@ -103,66 +103,71 @@ export function Header() {
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen((value) => !value)}
               >
-                <span></span>
-                <span></span>
-                <span></span>
+                <span className="menu-icon" aria-hidden="true">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+                <span className="menu-label">Menú</span>
               </button>
 
               <div className={`header-menu ${menuOpen ? "open" : ""}`}>
-                <nav className="header-nav">
-                  {inProtectedArea && (
-                    <button onClick={() => { goToHomeView(); closeMenu(); }} className="btn-small">
-                      Inicio
-                    </button>
-                  )}
-                  {inProtectedArea && (
-                    <button onClick={() => { goToHomeView("mis-solicitudes"); closeMenu(); }} className="btn-small">
-                      Mis Solicitudes
-                    </button>
-                  )}
-                  {
-                    <button onClick={() => { navigate("/home/equipo"); closeMenu(); }} className="btn-small">
-                      Solicitudes de Equipo
-                    </button>
-                  }
-                  {
-                    <button onClick={() => { navigate("/home/equipo?mode=create"); closeMenu(); }} className="btn-small">
-                      Crear Solicitud Equipo
-                    </button>
-                  }
-                  {inProtectedArea && !isRrhh && !isOfficeManager && !isJefe && (
-                    <button onClick={() => { navigate("/home/encargado"); closeMenu(); }} className="btn-small">
-                      Solicitudes Asignadas
-                    </button>
-                  )}
-                  {inProtectedArea && isRrhh && (
-                    <>
-                      <button onClick={() => { goToHomeView("signup"); closeMenu(); }} className="btn-small">
-                        Registrar Usuario
+                <div className="header-menu-panel">
+                  <nav className="header-nav">
+                    {inProtectedArea && (
+                      <button onClick={() => { goToHomeView(); closeMenu(); }} className="btn-small">
+                        Inicio
                       </button>
-                      <button onClick={() => { goToHomeView("onboarding"); closeMenu(); }} className="btn-small">
-                        Crear Onboarding
+                    )}
+                    {inProtectedArea && (
+                      <button onClick={() => { goToHomeView("mis-solicitudes"); closeMenu(); }} className="btn-small">
+                        Mis Solicitudes
                       </button>
-                      <button onClick={() => { goToHomeView("solicitudes"); closeMenu(); }} className="btn-small">
-                        Solicitudes
+                    )}
+                    {
+                      <button onClick={() => { navigate("/home/equipo"); closeMenu(); }} className="btn-small">
+                        Solicitudes de Equipo
                       </button>
-                      <button onClick={() => { goToHomeView("dotacion"); closeMenu(); }} className="btn-small">
-                        Dotación
+                    }
+                    {
+                      <button onClick={() => { navigate("/home/equipo?mode=create"); closeMenu(); }} className="btn-small">
+                        Crear Solicitud Equipo
                       </button>
-                    </>
-                  )}
-                  {inProtectedArea && isOfficeManager && (
-                    <button onClick={() => { navigate("/home/oficinas"); closeMenu(); }} className="btn-small">
-                      Oficinas
+                    }
+                    {inProtectedArea && !isRrhh && !isOfficeManager && !isJefe && (
+                      <button onClick={() => { navigate("/home/encargado"); closeMenu(); }} className="btn-small">
+                        Solicitudes Asignadas
+                      </button>
+                    )}
+                    {inProtectedArea && isRrhh && (
+                      <>
+                        <button onClick={() => { goToHomeView("signup"); closeMenu(); }} className="btn-small">
+                          Registrar Usuario
+                        </button>
+                        <button onClick={() => { goToHomeView("onboarding"); closeMenu(); }} className="btn-small">
+                          Crear Onboarding
+                        </button>
+                        <button onClick={() => { goToHomeView("solicitudes"); closeMenu(); }} className="btn-small">
+                          Solicitudes
+                        </button>
+                        <button onClick={() => { goToHomeView("dotacion"); closeMenu(); }} className="btn-small">
+                          Dotación
+                        </button>
+                      </>
+                    )}
+                    {inProtectedArea && isOfficeManager && (
+                      <button onClick={() => { navigate("/home/oficinas"); closeMenu(); }} className="btn-small">
+                        Oficinas
+                      </button>
+                    )}
+                    <span className="user-info">
+                      Hola, {usuario?.correo}
+                    </span>
+                    <button onClick={async () => { await handleLogout(); closeMenu(); }} className="btn-logout">
+                      Cerrar Sesión
                     </button>
-                  )}
-                  <span className="user-info">
-                    Hola, {usuario?.correo}
-                  </span>
-                  <button onClick={async () => { await handleLogout(); closeMenu(); }} className="btn-logout">
-                    Cerrar Sesión
-                  </button>
-                </nav>
+                  </nav>
+                </div>
               </div>
             </>
           ) : (
