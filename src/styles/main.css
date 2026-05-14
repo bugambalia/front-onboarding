@@ -800,6 +800,61 @@ main {
 .badge {
   letter-spacing: 0.02em;
 }
+.request-detail-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.request-detail-dialog {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  box-shadow: 0 12px 30px rgba(2,6,23,0.2);
+}
+
+.request-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.request-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.request-detail-specs {
+  white-space: pre-wrap;
+  background: #f7f7f7;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+@media (max-width: 720px) {
+  .request-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .request-detail-dialog {
+    padding: 12px;
+    max-width: 720px;
+  }
+}
 
 .activity-item {
   align-items: flex-start;
