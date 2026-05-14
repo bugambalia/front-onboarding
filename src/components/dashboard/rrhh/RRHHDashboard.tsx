@@ -41,6 +41,12 @@ export function RRHHDashboard() {
     const [solicitudes, setSolicitudes] = useState<OnboardingResponse[]>([]);
     const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingResponse | null>(null);
     const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
+    const [editData, setEditData] = useState({
+        estado: "Pendiente" as OnboardingStatus,
+        destinatario: "",
+        especificaciones: "",
+        fecha_fin: "",
+    });
     const [historial, setHistorial] = useState<OnboardingHistoryResponse[]>([]);
     const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
     const [loadingHistorial, setLoadingHistorial] = useState(false);
@@ -150,8 +156,14 @@ export function RRHHDashboard() {
         }
     }, [currentView, scope]);
 
-    const handleSelectSolicitud = (solicitud: OnboardingResponse) => {
+    const handleSelectSolicitud = async (solicitud: OnboardingResponse) => {
         setSelectedSolicitud(solicitud);
+        setEditData({
+            estado: solicitud.estado,
+            destinatario: solicitud.destinatario ?? "",
+            especificaciones: solicitud.especificaciones ?? "",
+            fecha_fin: solicitud.fecha_fin ? solicitud.fecha_fin.slice(0, 10) : "",
+        });
         setHistorial([]);
     };
 
@@ -167,7 +179,38 @@ export function RRHHDashboard() {
         }
     };
 
-    
+    const handleUpdateSolicitud = async (data?: { estado: OnboardingStatus; destinatario: string; especificaciones: string; fecha_fin: string; }) => {
+        if (!selectedSolicitud) return;
+
+        setLoading(true);
+        setMessage({ type: "", text: "" });
+
+        try {
+            const payload = data ?? {
+                estado: editData.estado,
+                destinatario: editData.destinatario,
+                especificaciones: editData.especificaciones,
+                fecha_fin: editData.fecha_fin,
+            };
+
+            const updated = await onboardingService.updateStatus(selectedSolicitud.id, {
+                estado: payload.estado,
+                destinatario: payload.destinatario || null,
+                especificaciones: payload.especificaciones || null,
+                fecha_fin: payload.fecha_fin ? new Date(payload.fecha_fin).toISOString() : null,
+            });
+
+            setSelectedSolicitud(updated);
+            setSolicitudes((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+            setMessage({ type: "success", text: `Solicitud #${updated.id} actualizada correctamente.` });
+            await handleLoadHistory(updated.id);
+        } catch (error: any) {
+            setMessage({ type: "error", text: error.message || "Error actualizando la solicitud" });
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCreateDotacionTemplate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -481,7 +524,19 @@ export function RRHHDashboard() {
                         </section>
                     </section>
 
-                    {/* Edit form moved to modal: RequestEditModal */}
+                    {selectedSolicitud && (
+                        <RequestEditModal
+                            open={!!selectedSolicitud}
+                            solicitud={selectedSolicitud}
+                            cargos={cargos}
+                            loadingCargos={loadingCargos}
+                            onClose={() => setSelectedSolicitud(null)}
+                            onSave={async (data) => {
+                                await handleUpdateSolicitud(data);
+                                setSelectedSolicitud(null);
+                            }}
+                        />
+                    )}
 
                     <section className="dashboard-card signup-section">
                         <h3>Historial de Solicitud</h3>
@@ -627,21 +682,6 @@ export function RRHHDashboard() {
             </section>
             {detailRequest && (
                 <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
-            )}
-            {selectedSolicitud && (
-                <RequestEditModal
-                    open={!!selectedSolicitud}
-                    solicitud={selectedSolicitud}
-                    encargadoCargos={encargadoCargos}
-                    loadingCargos={loadingCargos}
-                    onClose={() => setSelectedSolicitud(null)}
-                    onSaved={(updated) => {
-                        setSolicitudes((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-                        setSelectedSolicitud(null);
-                        setMessage({ type: "success", text: `Solicitud #${updated.id} actualizada correctamente.` });
-                        handleLoadHistory(updated.id);
-                    }}
-                />
             )}
         </div>
     );
