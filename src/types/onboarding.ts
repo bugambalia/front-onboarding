@@ -150,3 +150,12 @@ export interface ResumenRendimientoResponse {
     top_destinatarios_lentos: TopRendimientoItemResponse[];
     top_tipos_solicitud_lentos: TopRendimientoItemResponse[];
 }
+
+export interface TopSolicitudResponse {
+    id: number;
+    destinatario: string;
+    especificacion: string;
+    estado_actual: string;
+    total_minutes: number;
+    finalized_at?: string | null;
+}

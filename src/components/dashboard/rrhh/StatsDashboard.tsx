@@ -18,6 +18,7 @@ import type {
     DesempenioTipoSolicitudResponse,
     TimelineRendimientoResponse,
     EventoTimelineResponse,
+    TopSolicitudResponse,
 } from "@/types/onboarding";
 
 export const StatsDashboard: React.FC = () => {
@@ -26,6 +27,7 @@ export const StatsDashboard: React.FC = () => {
     const [porDestinatario, setPorDestinatario] = useState<DesempenioDestinatarioResponse[]>([]);
     const [porTipo, setPorTipo] = useState<DesempenioTipoSolicitudResponse[]>([]);
     const [timeline, setTimeline] = useState<TimelineRendimientoResponse | null>(null);
+    const [topSolicitudes, setTopSolicitudes] = useState<TopSolicitudResponse[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -39,17 +41,19 @@ export const StatsDashboard: React.FC = () => {
                 top_n: filters.top_n || undefined,
             } as any;
 
-            const [res, dest, tipo, tl] = await Promise.all([
+            const [res, dest, tipo, tl, top] = await Promise.all([
                 onboardingService.getResumenGeneral(params),
                 onboardingService.getDesempenioPorDestinatario(params),
                 onboardingService.getDesempenioPorTipoSolicitud(params),
                 onboardingService.getTimeline(params),
+                onboardingService.getTopSolicitudes(params),
             ]);
 
             setResumen(res);
             setPorDestinatario(dest || []);
             setPorTipo(tipo || []);
             setTimeline(tl || null);
+            setTopSolicitudes(top || []);
         } catch (err: any) {
             setError(err?.message || "Error cargando estadísticas");
         } finally {
@@ -161,6 +165,40 @@ export const StatsDashboard: React.FC = () => {
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
+            </div>
+
+            <div className="chart-card" style={{ marginTop: 16 }}>
+                <h4>Top Solicitudes</h4>
+                {topSolicitudes.length === 0 ? (
+                    <p className="helper-text">No hay datos disponibles.</p>
+                ) : (
+                    <div className="table-wrapper">
+                        <table className="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Destinatario</th>
+                                    <th>Especificación</th>
+                                    <th>Estado</th>
+                                    <th>Minutos</th>
+                                    <th>Finalizado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {topSolicitudes.map((s) => (
+                                    <tr key={s.id}>
+                                        <td>#{s.id}</td>
+                                        <td>{s.destinatario}</td>
+                                        <td>{s.especificacion}</td>
+                                        <td>{s.estado_actual}</td>
+                                        <td>{s.total_minutes}</td>
+                                        <td>{s.finalized_at ? new Date(s.finalized_at).toLocaleString() : '—'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
     );

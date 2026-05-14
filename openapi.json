@@ -1611,6 +1611,103 @@
         }
       }
     },
+    "/v1/onboarding/estadisticas/top-solicitudes": {
+      "get": {
+        "tags": [
+          "Onboarding"
+        ],
+        "summary": "Get Top Solicitudes",
+        "operationId": "get_top_solicitudes_v1_onboarding_estadisticas_top_solicitudes_get",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "fecha_desde",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fecha Desde"
+            }
+          },
+          {
+            "name": "fecha_hasta",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fecha Hasta"
+            }
+          },
+          {
+            "name": "top_n",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 5,
+              "title": "Top N"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "default": "desc",
+              "title": "Order"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopSolicitudResponse"
+                  },
+                  "title": "Response Get Top Solicitudes V1 Onboarding Estadisticas Top Solicitudes Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/": {
       "get": {
         "tags": [
@@ -2902,6 +2999,50 @@
           "cantidad_solicitudes"
         ],
         "title": "TopRendimientoItemResponse"
+      },
+      "TopSolicitudResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "destinatario": {
+            "type": "string",
+            "title": "Destinatario"
+          },
+          "especificacion": {
+            "type": "string",
+            "title": "Especificacion"
+          },
+          "estado_actual": {
+            "type": "string",
+            "title": "Estado Actual"
+          },
+          "total_minutes": {
+            "type": "number",
+            "title": "Total Minutes"
+          },
+          "finalized_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finalized At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "destinatario",
+          "especificacion",
+          "estado_actual",
+          "total_minutes"
+        ],
+        "title": "TopSolicitudResponse"
       },
       "ValidationError": {
         "properties": {

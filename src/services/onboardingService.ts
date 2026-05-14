@@ -17,6 +17,7 @@ import type {
     DesempenioDestinatarioResponse,
     DesempenioTipoSolicitudResponse,
     TimelineRendimientoResponse,
+    TopSolicitudResponse,
 } from "@/types/onboarding";
 
 const ONBOARDING_ENDPOINTS = {
@@ -34,6 +35,7 @@ const ONBOARDING_ENDPOINTS = {
     ESTADISTICAS_DESTINATARIO: `${API_BASE_URL}/v1/onboarding/estadisticas/desempenio-por-destinatario`,
     ESTADISTICAS_TIPO: `${API_BASE_URL}/v1/onboarding/estadisticas/desempenio-por-solicitud`,
     ESTADISTICAS_TIMELINE: `${API_BASE_URL}/v1/onboarding/estadisticas/timeline`,
+    ESTADISTICAS_TOP: `${API_BASE_URL}/v1/onboarding/estadisticas/top-solicitudes`,
 };
 
 class OnboardingService {
@@ -293,6 +295,23 @@ class OnboardingService {
             headers: this.getHeaders(),
         });
         if (!response.ok) throw new Error("Error obteniendo timeline de rendimiento");
+        return response.json();
+    }
+
+    /**
+     * Estadísticas - Top solicitudes (ej. más lentas)
+     */
+    async getTopSolicitudes(filters?: { fecha_desde?: string; fecha_hasta?: string; top_n?: number; order?: 'asc' | 'desc' }): Promise<TopSolicitudResponse[]> {
+        const params = new URLSearchParams();
+        if (filters?.fecha_desde) params.set('fecha_desde', filters.fecha_desde);
+        if (filters?.fecha_hasta) params.set('fecha_hasta', filters.fecha_hasta);
+        if (filters?.top_n) params.set('top_n', String(filters.top_n));
+        if (filters?.order) params.set('order', filters.order);
+        const query = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.ESTADISTICAS_TOP}${query}`, {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo top solicitudes");
         return response.json();
     }
 }
