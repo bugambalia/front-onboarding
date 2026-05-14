@@ -54,6 +54,47 @@ body {
 	min-height: 74px;
 }
 
+/* Header collapse: inline nav on desktop, hamburger on small screens */
+.header-nav-inline {
+	display: flex;
+	gap: 0.75rem;
+	align-items: center;
+}
+
+.app-header .menu-toggle {
+	display: none;
+}
+
+@media (max-width: 768px) {
+	.app-header .menu-toggle {
+		display: inline-flex;
+	}
+	.header-actions .header-nav-inline {
+		display: none;
+	}
+	.header-menu {
+		display: none;
+		position: absolute;
+		top: calc(100% + 0.75rem);
+		right: 1rem;
+		z-index: 30;
+		width: min(92vw, 340px);
+		padding: 0.75rem;
+		background: #ffffff;
+		border: 1px solid #dbe4f0;
+		border-radius: 18px;
+		box-shadow: 0 22px 50px rgba(15, 23, 42, 0.16);
+	}
+	.header-menu.open {
+		display: block;
+	}
+	.header-menu .header-nav {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 0.65rem;
+	}
+}
+
 .header-brand {
 	display: flex;
 	align-items: center;
