@@ -123,6 +123,23 @@ export function Header() {
           <h1 className="app-title">Sistema de Inducciones</h1>
         </div>
 
+        {isAuthenticated && inProtectedArea && isRrhh && (
+          <div className="header-quick-actions">
+            <button type="button" className="btn-secondary" onClick={() => { goToHomeView("solicitudes"); }}>
+              Solicitudes
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => { goToHomeView("onboarding"); }}>
+              Crear Onboarding
+            </button>
+            <button type="button" className="btn-secondary" onClick={() => { goToHomeView("dotacion"); }}>
+              Plantillas Dotación
+            </button>
+            <button type="button" className="btn-primary" onClick={() => { navigate("/home/rrhh/estadisticas"); }}>
+              Estadísticas
+            </button>
+          </div>
+        )}
+
         <div className="header-actions" ref={menuContainerRef}>
           {isAuthenticated ? (
             <>
