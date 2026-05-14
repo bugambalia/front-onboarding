@@ -2,7 +2,7 @@
  * Header de la aplicación
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import logoEmpresa from "@/assets/images/LogoEmpresa.png";
@@ -13,6 +13,7 @@ export function Header() {
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
   const rol = (usuario?.rol ?? "").toLowerCase();
   const cargo = Number(usuario?.cargo);
@@ -83,6 +84,35 @@ export function Header() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node;
+      if (menuContainerRef.current && !menuContainerRef.current.contains(target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown, { passive: true });
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("touchstart", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [menuOpen]);
+
   const closeMenu = () => setMenuOpen(false);
 
   return (
@@ -93,7 +123,7 @@ export function Header() {
           <h1 className="app-title">Sistema de Inducciones</h1>
         </div>
 
-        <div className="header-actions">
+        <div className="header-actions" ref={menuContainerRef}>
           {isAuthenticated ? (
             <>
               <button
