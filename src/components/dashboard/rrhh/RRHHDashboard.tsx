@@ -11,6 +11,7 @@ import type {
 import type { CargoJerarquia } from "@/types/auth";
 import { getEncargadoCargos } from "@/utils/cargoFilters";
 import { RequestDetailModal } from "@/components/common/RequestDetailModal";
+import { RequestEditModal } from "@/components/common/RequestEditModal";
 
 export function RRHHDashboard() {
     const { usuario } = useAuth();
@@ -40,13 +41,6 @@ export function RRHHDashboard() {
     const [solicitudes, setSolicitudes] = useState<OnboardingResponse[]>([]);
     const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingResponse | null>(null);
     const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
-    const [detailInitialTab, setDetailInitialTab] = useState<"details" | "history" | "edit">("details");
-    const [editData, setEditData] = useState({
-        estado: "Pendiente" as OnboardingStatus,
-        destinatario: "",
-        especificaciones: "",
-        fecha_fin: "",
-    });
     const [historial, setHistorial] = useState<OnboardingHistoryResponse[]>([]);
     const [loadingSolicitudes, setLoadingSolicitudes] = useState(false);
     const [loadingHistorial, setLoadingHistorial] = useState(false);
@@ -156,14 +150,8 @@ export function RRHHDashboard() {
         }
     }, [currentView, scope]);
 
-    const handleSelectSolicitud = async (solicitud: OnboardingResponse) => {
+    const handleSelectSolicitud = (solicitud: OnboardingResponse) => {
         setSelectedSolicitud(solicitud);
-        setEditData({
-            estado: solicitud.estado,
-            destinatario: solicitud.destinatario ?? "",
-            especificaciones: solicitud.especificaciones ?? "",
-            fecha_fin: solicitud.fecha_fin ? solicitud.fecha_fin.slice(0, 10) : "",
-        });
         setHistorial([]);
     };
 
@@ -179,31 +167,7 @@ export function RRHHDashboard() {
         }
     };
 
-    const handleUpdateSolicitud = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedSolicitud) return;
-
-        setLoading(true);
-        setMessage({ type: "", text: "" });
-
-        try {
-            const updated = await onboardingService.updateStatus(selectedSolicitud.id, {
-                estado: editData.estado,
-                destinatario: editData.destinatario || null,
-                especificaciones: editData.especificaciones || null,
-                fecha_fin: editData.fecha_fin ? new Date(editData.fecha_fin).toISOString() : null,
-            });
-
-            setSelectedSolicitud(updated);
-            setSolicitudes((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-            setMessage({ type: "success", text: `Solicitud #${updated.id} actualizada correctamente.` });
-            await handleLoadHistory(updated.id);
-        } catch (error: any) {
-            setMessage({ type: "error", text: error.message || "Error actualizando la solicitud" });
-        } finally {
-            setLoading(false);
-        }
-    };
+    
 
     const handleCreateDotacionTemplate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -504,9 +468,9 @@ export function RRHHDashboard() {
                                                     <td>{solicitud.destinatario || "—"}</td>
                                                     <td>{solicitud.especificaciones || solicitud.aviso || "—"}</td>
                                                     <td>
-                                                        <button className="btn-small" onClick={() => { setDetailInitialTab("details"); setDetailRequest(solicitud); }}>Ver</button>
-                                                        <button className="btn-small" onClick={() => { setDetailInitialTab("edit"); setDetailRequest(solicitud); }} style={{ marginLeft: "0.5rem" }}>Editar</button>
-                                                        <button className="btn-small" onClick={() => { setDetailInitialTab("history"); setDetailRequest(solicitud); }} style={{ marginLeft: "0.5rem" }}>Historial</button>
+                                                        <button className="btn-small" onClick={() => setDetailRequest(solicitud)}>Ver</button>
+                                                        <button className="btn-small" onClick={() => handleSelectSolicitud(solicitud)} style={{ marginLeft: "0.5rem" }}>Editar</button>
+                                                        <button className="btn-small" onClick={() => handleLoadHistory(solicitud.id)} style={{ marginLeft: "0.5rem" }}>Historial</button>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -517,62 +481,7 @@ export function RRHHDashboard() {
                         </section>
                     </section>
 
-                    {selectedSolicitud && (
-                        <section className="dashboard-card signup-section">
-                            <h3>Editar Solicitud #{selectedSolicitud.id}</h3>
-                            <form onSubmit={handleUpdateSolicitud} className="signup-form">
-                                <div className="form-group">
-                                    <label>Estado</label>
-                                    <select
-                                        value={editData.estado}
-                                        onChange={(e) => setEditData({ ...editData, estado: e.target.value as OnboardingStatus })}
-                                        className="form-select"
-                                    >
-                                        <option value="Pendiente">Pendiente</option>
-                                        <option value="En proceso">En proceso</option>
-                                        <option value="Finalizado">Finalizado</option>
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Destinatario (Encargado)</label>
-                                    <select
-                                        value={editData.destinatario}
-                                        onChange={(e) => setEditData({ ...editData, destinatario: e.target.value })}
-                                        className="form-select"
-                                        disabled={loadingCargos}
-                                    >
-                                        <option value="">{loadingCargos ? "Cargando encargados..." : "Selecciona encargado"}</option>
-                                        {encargadoCargos.map((cargo) => (
-                                            <option key={`edit-dest-${cargo.id}`} value={cargo.nombre_cargo}>
-                                                {cargo.id} - {cargo.nombre_cargo} ({cargo.area})
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="form-group">
-                                    <label>Fecha Fin</label>
-                                    <input
-                                        type="date"
-                                        value={editData.fecha_fin}
-                                        onChange={(e) => setEditData({ ...editData, fecha_fin: e.target.value })}
-                                    />
-                                </div>
-                                <div className="form-group">
-                                    <label>Especificaciones</label>
-                                    <input
-                                        type="text"
-                                        value={editData.especificaciones}
-                                        onChange={(e) => setEditData({ ...editData, especificaciones: e.target.value })}
-                                    />
-                                </div>
-                                <div className="form-actions">
-                                    <button type="submit" className="btn-primary" disabled={loading}>
-                                        {loading ? "Actualizando..." : "Guardar Cambios"}
-                                    </button>
-                                </div>
-                            </form>
-                        </section>
-                    )}
+                    {/* Edit form moved to modal: RequestEditModal */}
 
                     <section className="dashboard-card signup-section">
                         <h3>Historial de Solicitud</h3>
@@ -717,20 +626,21 @@ export function RRHHDashboard() {
                 </ul>
             </section>
             {detailRequest && (
-                <RequestDetailModal
-                    open={!!detailRequest}
-                    solicitud={detailRequest}
-                    initialTab={detailInitialTab}
-                    onUpdate={(updated) => {
+                <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+            )}
+            {selectedSolicitud && (
+                <RequestEditModal
+                    open={!!selectedSolicitud}
+                    solicitud={selectedSolicitud}
+                    encargadoCargos={encargadoCargos}
+                    loadingCargos={loadingCargos}
+                    onClose={() => setSelectedSolicitud(null)}
+                    onSaved={(updated) => {
                         setSolicitudes((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-                        if (selectedSolicitud && selectedSolicitud.id === updated.id) setSelectedSolicitud(updated);
+                        setSelectedSolicitud(null);
                         setMessage({ type: "success", text: `Solicitud #${updated.id} actualizada correctamente.` });
-                        // refresh historial for updated
                         handleLoadHistory(updated.id);
-                        // keep modal showing updated values
-                        setDetailRequest(updated);
                     }}
-                    onClose={() => setDetailRequest(null)}
                 />
             )}
         </div>
