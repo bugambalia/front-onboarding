@@ -5,11 +5,13 @@ import { authService } from "@/services/authService";
 import type { OnboardingCreateRequest, OnboardingResponse } from "@/types/onboarding";
 import type { CargoJerarquia } from "@/types/auth";
 import { getEncargadoCargos } from "@/utils/cargoFilters";
+import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 
 export function JefeDashboard() {
     const { usuario } = useAuth();
     const [solicitudes, setSolicitudes] = useState<OnboardingResponse[]>([]);
     const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingResponse | null>(null);
+    const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
     const [nuevaSolicitud, setNuevaSolicitud] = useState<OnboardingCreateRequest>({
         id_empleado: 0,
         fecha_fin: "",
@@ -280,25 +282,31 @@ export function JefeDashboard() {
                             <table className="dashboard-table">
                                 <thead>
                                     <tr>
-                                        <th>ID Solicitud</th>
-                                        <th>Usuario ID</th>
-                                        <th>Fecha Creación</th>
-                                        <th>Estado</th>
-                                        <th>Acción</th>
+                                                <th>ID Solicitud</th>
+                                                <th>Usuario ID</th>
+                                                <th>Fecha Creación</th>
+                                                <th>Destinatario</th>
+                                                <th>Especificaciones</th>
+                                                <th>Estado</th>
+                                                <th>Acción</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {solicitudes.map((sol) => (
                                         <tr key={sol.id}>
                                             <td>#{sol.id}</td>
-                                            <td>ID: {sol.id_empleado}</td>
-                                            <td>{new Date(sol.fecha_creacion).toLocaleDateString()}</td>
-                                            <td><span className="badge badge-warning">{sol.estado}</span></td>
+                                                    <td>ID: {sol.id_empleado}</td>
+                                                    <td>{new Date(sol.fecha_creacion).toLocaleDateString()}</td>
+                                                    <td>{sol.destinatario || "—"}</td>
+                                                    <td>{sol.especificaciones || sol.aviso || "—"}</td>
+                                                    <td><span className="badge badge-warning">{sol.estado}</span></td>
                                             <td>
+                                                <button className="btn-small" onClick={() => setDetailRequest(sol)}>Ver</button>
                                                 <button
                                                     className="btn-small"
                                                     onClick={() => handleConfirmarSolicitud(sol.id)}
                                                     disabled={loading || sol.estado === "Finalizado" || sol.estado === "Rechazado"}
+                                                    style={{ marginLeft: "0.5rem" }}
                                                 >
                                                     Confirmar
                                                 </button>
@@ -318,6 +326,9 @@ export function JefeDashboard() {
                     </section>
                 </>
             )}
-        </div>
+            {detailRequest && (
+                <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+            )}
+                </div>
     );
 }

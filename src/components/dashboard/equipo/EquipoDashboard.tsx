@@ -6,6 +6,7 @@ import type { OnboardingCreateRequest, OnboardingResponse, DotacionTemplateRespo
 import type { CargoJerarquia } from "@/types/auth";
 import { useLocation } from "react-router-dom";
 import { getEncargadoCargos } from "@/utils/cargoFilters";
+import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 
 export function EquipoDashboard() {
   const { usuario } = useAuth();
@@ -32,6 +33,7 @@ export function EquipoDashboard() {
   const [loadingCargos, setLoadingCargos] = useState(false);
   const [cargos, setCargos] = useState<CargoJerarquia[]>([]);
   const encargadoCargos = getEncargadoCargos(cargos);
+  const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
 
   const loadTeamRequests = async (overrides?: {
     estado?: string;
@@ -321,6 +323,8 @@ export function EquipoDashboard() {
                   <th>Estado</th>
                   <th>Fecha creación</th>
                   <th>Fecha fin</th>
+                  <th>Destinatario</th>
+                  <th>Especificaciones</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -332,12 +336,18 @@ export function EquipoDashboard() {
                     <td><span className="badge badge-info">{solicitud.estado}</span></td>
                     <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
                     <td>{solicitud.fecha_fin ? new Date(solicitud.fecha_fin).toLocaleDateString() : "—"}</td>
+                    <td>{solicitud.destinatario || "—"}</td>
+                    <td>{solicitud.especificaciones || solicitud.aviso || "—"}</td>
                     <td>
+                      <button type="button" className="btn-small" onClick={() => setDetailRequest(solicitud)}>
+                        Ver
+                      </button>
                       <button
                         type="button"
                         className="btn-small"
                         onClick={() => handleSendToAreaManager(solicitud.id)}
                         disabled={updatingId === solicitud.id || solicitud.estado === "Finalizado" || solicitud.estado === "Rechazado"}
+                        style={{ marginLeft: "0.5rem" }}
                       >
                         {updatingId === solicitud.id ? "Enviando..." : "Enviar a Encargado"}
                       </button>
@@ -349,6 +359,9 @@ export function EquipoDashboard() {
           </div>
         )}
       </section>
+      {detailRequest && (
+        <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+      )}
     </div>
   );
 }

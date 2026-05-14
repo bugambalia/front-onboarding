@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
 import type { OnboardingResponse } from "@/types/onboarding";
+import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 
 export function EncargadoDashboard() {
   const { usuario } = useAuth();
@@ -9,6 +10,7 @@ export function EncargadoDashboard() {
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<number | null>(null);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
 
   const loadAssigned = async () => {
     try {
@@ -65,9 +67,11 @@ export function EncargadoDashboard() {
               <tr>
                 <th>Solicitud</th>
                 <th>Empleado</th>
-                <th>Creación</th>
-                <th>Estado</th>
-                <th>Acción</th>
+                  <th>Creación</th>
+                  <th>Destinatario</th>
+                  <th>Especificaciones</th>
+                  <th>Estado</th>
+                  <th>Acción</th>
               </tr>
             </thead>
             <tbody>
@@ -75,14 +79,18 @@ export function EncargadoDashboard() {
                 <tr key={solicitud.id}>
                   <td>#{solicitud.id}</td>
                   <td>{solicitud.id_empleado}</td>
-                  <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
-                  <td><span className="badge badge-info">{solicitud.estado}</span></td>
+                    <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
+                    <td>{solicitud.destinatario || "—"}</td>
+                    <td>{solicitud.especificaciones || solicitud.aviso || "—"}</td>
+                    <td><span className="badge badge-info">{solicitud.estado}</span></td>
                   <td>
+                    <button type="button" className="btn-small" onClick={() => setDetailRequest(solicitud)}>Ver</button>
                     <button
                       type="button"
                       className="btn-small"
                       onClick={() => handleFinalizar(solicitud.id)}
                       disabled={processingId === solicitud.id}
+                      style={{ marginLeft: "0.5rem" }}
                     >
                       {processingId === solicitud.id ? "Finalizando..." : "Finalizar"}
                     </button>
@@ -93,6 +101,9 @@ export function EncargadoDashboard() {
           </table>
         )}
       </section>
+      {detailRequest && (
+        <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+      )}
     </div>
   );
 }

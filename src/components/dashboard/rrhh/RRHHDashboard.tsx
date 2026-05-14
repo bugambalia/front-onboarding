@@ -10,6 +10,7 @@ import type {
 } from "@/types/onboarding";
 import type { CargoJerarquia } from "@/types/auth";
 import { getEncargadoCargos } from "@/utils/cargoFilters";
+import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 
 export function RRHHDashboard() {
     const { usuario } = useAuth();
@@ -38,6 +39,7 @@ export function RRHHDashboard() {
     });
     const [solicitudes, setSolicitudes] = useState<OnboardingResponse[]>([]);
     const [selectedSolicitud, setSelectedSolicitud] = useState<OnboardingResponse | null>(null);
+    const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
     const [editData, setEditData] = useState({
         estado: "Pendiente" as OnboardingStatus,
         destinatario: "",
@@ -487,6 +489,7 @@ export function RRHHDashboard() {
                                                 <th>Estado</th>
                                                 <th>Creación</th>
                                                 <th>Destinatario</th>
+                                                <th>Especificaciones</th>
                                                 <th>Acciones</th>
                                             </tr>
                                         </thead>
@@ -498,8 +501,10 @@ export function RRHHDashboard() {
                                                     <td><span className="badge badge-warning">{solicitud.estado}</span></td>
                                                     <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
                                                     <td>{solicitud.destinatario || "—"}</td>
+                                                    <td>{solicitud.especificaciones || solicitud.aviso || "—"}</td>
                                                     <td>
-                                                        <button className="btn-small" onClick={() => handleSelectSolicitud(solicitud)}>Editar</button>
+                                                        <button className="btn-small" onClick={() => setDetailRequest(solicitud)}>Ver</button>
+                                                        <button className="btn-small" onClick={() => handleSelectSolicitud(solicitud)} style={{ marginLeft: "0.5rem" }}>Editar</button>
                                                         <button className="btn-small" onClick={() => handleLoadHistory(solicitud.id)} style={{ marginLeft: "0.5rem" }}>Historial</button>
                                                     </td>
                                                 </tr>
@@ -710,6 +715,9 @@ export function RRHHDashboard() {
                     </li>
                 </ul>
             </section>
+            {detailRequest && (
+                <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+            )}
         </div>
     );
 }

@@ -4,6 +4,7 @@ import { workstationService } from "@/services/workstationService";
 import { onboardingService } from "@/services/onboardingService";
 import type { WorkstationPosition } from "@/types/workstation";
 import type { OnboardingResponse } from "@/types/onboarding";
+import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 
 type Floor = 1 | 2;
 
@@ -55,6 +56,7 @@ export function OficinasDashboard() {
   const [occupied, setOccupied] = useState<Set<string>>(new Set());
   const [assignedRequests, setAssignedRequests] = useState<OnboardingResponse[]>([]);
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
+  const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
   const [employeeId, setEmployeeId] = useState("");
   const [tipoPuesto, setTipoPuesto] = useState("");
   const [loading, setLoading] = useState(false);
@@ -172,6 +174,8 @@ export function OficinasDashboard() {
                 <tr>
                   <th>Solicitud</th>
                   <th>Empleado</th>
+                  <th>Destinatario</th>
+                  <th>Detalle</th>
                   <th>Estado</th>
                   <th>Acción</th>
                 </tr>
@@ -181,9 +185,12 @@ export function OficinasDashboard() {
                   <tr key={request.id}>
                     <td>#{request.id}</td>
                     <td>{request.id_empleado}</td>
+                    <td>{request.destinatario || "—"}</td>
+                    <td>{request.especificaciones || request.aviso || "—"}</td>
                     <td><span className="badge badge-warning">{request.estado}</span></td>
                     <td>
-                      <button type="button" className="btn-small" onClick={() => handleUseRequest(request)}>
+                      <button type="button" className="btn-small" onClick={() => setDetailRequest(request)}>Ver</button>
+                      <button type="button" className="btn-small" onClick={() => handleUseRequest(request)} style={{ marginLeft: "0.5rem" }}>
                         Usar Solicitud
                       </button>
                     </td>
@@ -193,6 +200,10 @@ export function OficinasDashboard() {
             </table>
           )}
         </section>
+
+      {detailRequest && (
+        <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+      )}
 
         <section className="dashboard-card status-card">
           <h3>Pisos</h3>

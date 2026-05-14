@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { onboardingService } from "@/services/onboardingService";
 import type { OnboardingResponse } from "@/types/onboarding";
+import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 
 export function UsuarioDashboard() {
     const { usuario } = useAuth();
@@ -12,6 +13,7 @@ export function UsuarioDashboard() {
     const [loading, setLoading] = useState(true);
     const [acceptingFinalization, setAcceptingFinalization] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
+    const [detailRequest, setDetailRequest] = useState<OnboardingResponse | null>(null);
 
     const solicitudActiva = useMemo(
         () => solicitudes.find((item) => item.estado !== "Finalizado" && item.estado !== "Rechazado") ?? solicitudes[0] ?? null,
@@ -210,6 +212,7 @@ export function UsuarioDashboard() {
                                     <th>Fecha creación</th>
                                     <th>Fecha fin</th>
                                     <th>Detalle</th>
+                                    <th>Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -220,6 +223,9 @@ export function UsuarioDashboard() {
                                         <td>{new Date(solicitud.fecha_creacion).toLocaleDateString()}</td>
                                         <td>{solicitud.fecha_fin ? new Date(solicitud.fecha_fin).toLocaleDateString() : "—"}</td>
                                         <td>{solicitud.aviso || solicitud.especificaciones || "Sin observaciones"}</td>
+                                        <td>
+                                            <button className="btn-small" onClick={() => setDetailRequest(solicitud)}>Ver</button>
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -237,6 +243,9 @@ export function UsuarioDashboard() {
                     <button className="btn-small">Contactar RRHH</button>
                 </div>
             </section>
+            {detailRequest && (
+                <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+            )}
         </div>
     );
 }
