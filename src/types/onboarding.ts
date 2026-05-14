@@ -78,3 +78,75 @@ export interface Workstation {
     ala: string;
     estado: 'disponible' | 'ocupado' | 'mantenimiento';
 }
+
+// Estadísticas / Rendimiento
+export interface DesempenioDestinatarioResponse {
+    destinatario: string;
+    cantidad_solicitudes: number;
+    solicitudes_finalizadas: number;
+    solicitudes_rechazadas: number;
+    solicitudes_activas: number;
+    tasa_cierre: number;
+    tiempo_promedio_total_minutos?: number | null;
+    percentil_50_minutos?: number | null;
+    percentil_90_minutos?: number | null;
+}
+
+export interface DesempenioTipoSolicitudResponse {
+    especificacion: string;
+    cantidad_solicitudes: number;
+    solicitudes_finalizadas: number;
+    solicitudes_rechazadas: number;
+    solicitudes_activas: number;
+    tasa_cierre: number;
+    tiempo_promedio_total_minutos?: number | null;
+    percentil_50_minutos?: number | null;
+    percentil_90_minutos?: number | null;
+}
+
+export interface EstadoRendimientoResponse {
+    estado: string;
+    cantidad_solicitudes: number;
+    tiempo_promedio_minutos?: number | null;
+    tiempo_minimo_minutos?: number | null;
+    tiempo_maximo_minutos?: number | null;
+    percentil_50_minutos?: number | null;
+    percentil_90_minutos?: number | null;
+}
+
+export interface TopRendimientoItemResponse {
+    nombre: string;
+    cantidad_solicitudes: number;
+    tiempo_promedio_total_minutos?: number | null;
+    percentil_50_minutos?: number | null;
+    percentil_90_minutos?: number | null;
+}
+
+export interface EventoTimelineResponse {
+    fecha: string;
+    solicitudes_finalizadas: number;
+    solicitudes_rechazadas: number;
+    solicitudes_cerradas: number;
+    tiempo_promedio_cierre_minutos?: number | null;
+}
+
+export interface TimelineRendimientoResponse {
+    fecha_inicio: string;
+    fecha_fin: string;
+    eventos: EventoTimelineResponse[];
+}
+
+export interface ResumenRendimientoResponse {
+    total_solicitudes: number;
+    solicitudes_finalizadas: number;
+    solicitudes_rechazadas: number;
+    solicitudes_activas: number;
+    tasa_cierre: number;
+    tiempo_promedio_total_minutos?: number | null;
+    percentil_50_total_minutos?: number | null;
+    percentil_90_total_minutos?: number | null;
+    estado_mas_lento?: string | null;
+    por_estado: EstadoRendimientoResponse[];
+    top_destinatarios_lentos: TopRendimientoItemResponse[];
+    top_tipos_solicitud_lentos: TopRendimientoItemResponse[];
+}

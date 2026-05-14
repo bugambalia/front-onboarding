@@ -13,6 +13,10 @@ import type {
     OnboardingHistoryResponse,
     DotacionTemplateRequest,
     DotacionTemplateResponse,
+    ResumenRendimientoResponse,
+    DesempenioDestinatarioResponse,
+    DesempenioTipoSolicitudResponse,
+    TimelineRendimientoResponse,
 } from "@/types/onboarding";
 
 const ONBOARDING_ENDPOINTS = {
@@ -26,6 +30,10 @@ const ONBOARDING_ENDPOINTS = {
     ESTADO_SIGUIENTE_USUARIO: (id: number) => `${API_BASE_URL}/v1/onboarding/usuarios/${id}/estado-onboarding/siguiente`,
     RECHAZAR: (id: number) => `${API_BASE_URL}/v1/onboarding/solicitudes/${id}/rechazar`,
     DOTACION: `${API_BASE_URL}/v1/onboarding/dotacion`,
+    ESTADISTICAS_RESUMEN: `${API_BASE_URL}/v1/onboarding/estadisticas/resumen-general`,
+    ESTADISTICAS_DESTINATARIO: `${API_BASE_URL}/v1/onboarding/estadisticas/desempenio-por-destinatario`,
+    ESTADISTICAS_TIPO: `${API_BASE_URL}/v1/onboarding/estadisticas/desempenio-por-solicitud`,
+    ESTADISTICAS_TIMELINE: `${API_BASE_URL}/v1/onboarding/estadisticas/timeline`,
 };
 
 class OnboardingService {
@@ -226,6 +234,65 @@ class OnboardingService {
             headers: this.getHeaders(),
         });
         if (!response.ok) throw new Error("Error rechazando solicitud");
+        return response.json();
+    }
+
+    /**
+     * Estadísticas - Resumen general
+     */
+    async getResumenGeneral(filters?: { fecha_desde?: string; fecha_hasta?: string; }): Promise<ResumenRendimientoResponse> {
+        const query = this.buildQuery(filters as any);
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.ESTADISTICAS_RESUMEN}${query}`, {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo resumen de rendimiento");
+        return response.json();
+    }
+
+    /**
+     * Estadísticas - Desempeño por destinatario
+     */
+    async getDesempenioPorDestinatario(filters?: { fecha_desde?: string; fecha_hasta?: string; top_n?: number; }): Promise<DesempenioDestinatarioResponse[]> {
+        const params = new URLSearchParams();
+        if (filters?.fecha_desde) params.set('fecha_desde', filters.fecha_desde);
+        if (filters?.fecha_hasta) params.set('fecha_hasta', filters.fecha_hasta);
+        if (filters?.top_n) params.set('top_n', String(filters.top_n));
+        const query = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.ESTADISTICAS_DESTINATARIO}${query}`, {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo desempeño por destinatario");
+        return response.json();
+    }
+
+    /**
+     * Estadísticas - Desempeño por tipo de solicitud
+     */
+    async getDesempenioPorTipoSolicitud(filters?: { fecha_desde?: string; fecha_hasta?: string; top_n?: number; }): Promise<DesempenioTipoSolicitudResponse[]> {
+        const params = new URLSearchParams();
+        if (filters?.fecha_desde) params.set('fecha_desde', filters.fecha_desde);
+        if (filters?.fecha_hasta) params.set('fecha_hasta', filters.fecha_hasta);
+        if (filters?.top_n) params.set('top_n', String(filters.top_n));
+        const query = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.ESTADISTICAS_TIPO}${query}`, {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo desempeño por tipo de solicitud");
+        return response.json();
+    }
+
+    /**
+     * Estadísticas - Timeline
+     */
+    async getTimeline(filters?: { fecha_desde?: string; fecha_hasta?: string; }): Promise<TimelineRendimientoResponse> {
+        const params = new URLSearchParams();
+        if (filters?.fecha_desde) params.set('fecha_desde', filters.fecha_desde);
+        if (filters?.fecha_hasta) params.set('fecha_hasta', filters.fecha_hasta);
+        const query = params.toString() ? `?${params.toString()}` : '';
+        const response = await fetch(`${ONBOARDING_ENDPOINTS.ESTADISTICAS_TIMELINE}${query}`, {
+            headers: this.getHeaders(),
+        });
+        if (!response.ok) throw new Error("Error obteniendo timeline de rendimiento");
         return response.json();
     }
 }

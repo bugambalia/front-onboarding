@@ -12,12 +12,13 @@ import type { CargoJerarquia } from "@/types/auth";
 import { getEncargadoCargos } from "@/utils/cargoFilters";
 import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 import { RequestEditModal } from "@/components/common/RequestEditModal";
+import StatsDashboard from "@/components/dashboard/rrhh/StatsDashboard";
 
 export function RRHHDashboard() {
     const { usuario } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
-    const [currentView, setCurrentView] = useState<"home" | "signup" | "onboarding" | "solicitudes" | "dotacion">("home");
+    const [currentView, setCurrentView] = useState<"home" | "signup" | "onboarding" | "solicitudes" | "dotacion" | "estadisticas">("home");
     const [formData, setFormData] = useState({ correo: "", nombre: "", cargoId: "" });
     const [cargos, setCargos] = useState<CargoJerarquia[]>([]);
     const [loadingCargos, setLoadingCargos] = useState(false);
@@ -76,6 +77,10 @@ export function RRHHDashboard() {
             setCurrentView("dotacion");
             return;
         }
+        if (path === "/home/rrhh/estadisticas") {
+            setCurrentView("estadisticas");
+            return;
+        }
 
         const query = new URLSearchParams(location.search);
         const view = query.get("view");
@@ -97,6 +102,10 @@ export function RRHHDashboard() {
 
         if (view === "dotacion") {
             setCurrentView("dotacion");
+            return;
+        }
+        if (view === "estadisticas") {
+            setCurrentView("estadisticas");
             return;
         }
 
@@ -364,6 +373,10 @@ export function RRHHDashboard() {
                         </div>
                     </form>
                 </section>
+            )}
+
+            {currentView === "estadisticas" && (
+                <StatsDashboard />
             )}
 
             {currentView === "onboarding" && (
@@ -643,6 +656,13 @@ export function RRHHDashboard() {
                         <h3>Plantillas Dotación</h3>
                         <p>Crea plantillas de dotación para onboarding y estandariza especificaciones.</p>
                         <button className="btn-primary" onClick={() => navigate("/home/rrhh/dotacion")}>Crear Plantilla</button>
+                    </section>
+
+                    <section className="dashboard-card action-card">
+                        <div className="card-icon">📊</div>
+                        <h3>Estadísticas</h3>
+                        <p>Visualiza métricas y rendimiento del proceso de onboarding.</p>
+                        <button className="btn-primary" onClick={() => navigate("/home/rrhh/estadisticas")}>Ver Estadísticas</button>
                     </section>
 
                     <section className="dashboard-card status-card">
