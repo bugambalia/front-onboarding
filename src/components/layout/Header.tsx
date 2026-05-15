@@ -140,7 +140,6 @@ export function Header() {
                     <span></span>
                   </span>
                 </span>
-                <span className="menu-label">Menú</span>
                 <span className="menu-caret" aria-hidden="true">▾</span>
               </button>
 
