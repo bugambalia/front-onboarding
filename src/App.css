@@ -106,80 +106,84 @@ body {
 	border-color: rgba(255, 255, 255, 0.4);
 }
 
-.menu-icon {
+/* Contenedor principal del botón */
+.menu-toggle.menu-xl {
 	display: inline-flex;
+	align-items: center;
+	padding: 12px 28px; /* Más grande y espaciado */
+	gap: 12px;
+	border-radius: 50px; /* Bordes redondeados tipo píldora, más moderno */
+	background: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(10px); /* Efecto de cristal esmerilado */
+	-webkit-backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	color: #ffffff;
+	cursor: pointer;
+	font-family: 'Inter', sans-serif; /* Tipografía limpia */
+	font-weight: 600;
+	font-size: 1.25rem; /* Tamaño de fuente aumentado */
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto Hover */
+.menu-toggle.menu-xl:hover {
+	background: rgba(255, 255, 255, 0.2);
+	transform: translateY(-2px); /* Pequeño salto al pasar el mouse */
+	box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+	border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Área del icono (el cuadradito o círculo) */
+.menu-toggle.menu-xl .menu-graphic {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+}
+
+/* Las rayitas del menú (Hamburguesa) */
+.menu-icon {
+	display: flex;
 	flex-direction: column;
-	gap: 4px;
+	gap: 5px; /* Espacio entre líneas */
 }
 
 .menu-icon span {
 	display: block;
-	width: 25px;
-	height: 2.5px;
-	border-radius: 999px;
+	width: 22px;
+	height: 2px;
 	background: #ffffff;
-	transition: transform 0.2s ease, opacity 0.2s ease;
+	border-radius: 2px;
+	transition: 0.3s;
 }
 
-/* New larger styled variant */
-.menu-toggle.menu-xl {
-	padding: 1.05rem 1.6rem;
-	gap: 1rem;
-	border-radius: 20px;
-	background: linear-gradient(90deg, rgba(40,167,69,0.95), rgba(27,54,93,0.95));
-	box-shadow: 0 10px 30px rgba(15,23,42,0.18);
-	border: none;
-	font-size: 1.18rem;
-}
-
-.menu-toggle.menu-xl .menu-label {
-	color: #ffffff;
-	font-weight: 700;
-	margin-left: 0.35rem;
-}
-
-.menu-toggle.menu-xl .menu-caret {
-	margin-left: 0.45rem;
-	color: rgba(255,255,255,0.95);
-	transition: transform 0.18s ease;
-}
-
-.menu-toggle.menu-xl.open .menu-caret {
-	transform: rotate(180deg) translateY(1px);
-}
-
-.menu-toggle.menu-xl .menu-graphic {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 40px;
-	height: 40px;
-	border-radius: 10px;
-	background: rgba(255,255,255,0.12);
-}
-
-.menu-toggle.menu-xl .menu-graphic .menu-icon span {
-	background: #ffffff;
-}
-
+/* Texto del botón */
 .menu-label {
-	display: inline;
-	width: auto;
-	height: auto;
-	background: transparent;
-	border-radius: 0;
+	letter-spacing: 0.5px;
+}
+
+/* La flechita (Caret) */
+.menu-caret {
+	font-size: 0.8rem;
+	opacity: 0.8;
+	transition: transform 0.3s ease;
+}
+
+/* Animación cuando está abierto */
+.menu-toggle.open .menu-caret {
+	transform: rotate(180deg);
 }
 
 .menu-toggle.open .menu-icon span:nth-child(1) {
-	transform: translateY(6px) rotate(45deg);
+	transform: translateY(7px) rotate(45deg);
 }
-
 .menu-toggle.open .menu-icon span:nth-child(2) {
 	opacity: 0;
 }
-
 .menu-toggle.open .menu-icon span:nth-child(3) {
-	transform: translateY(-6px) rotate(-45deg);
+	transform: translateY(-7px) rotate(-45deg);
 }
 
 .header-menu {
