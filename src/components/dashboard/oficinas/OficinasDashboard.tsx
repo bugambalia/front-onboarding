@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { workstationService } from "@/services/workstationService";
 import { onboardingService } from "@/services/onboardingService";
-import type { WorkstationPosition } from "@/types/workstation";
+import type { WorkstationPosition, SugerenciaPosicion } from "@/types/workstation";
 import type { OnboardingResponse } from "@/types/onboarding";
 import { RequestDetailModal } from "@/components/common/RequestDetailModal";
 
@@ -49,6 +49,16 @@ function extractPositions(input: unknown): WorkstationPosition[] {
   return positions;
 }
 
+function StarRating({ score }: { score: number }) {
+  return (
+    <span style={{ color: "#f59e0b", letterSpacing: "0.05em" }}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <span key={i} style={{ opacity: i < score ? 1 : 0.25 }}>★</span>
+      ))}
+    </span>
+  );
+}
+
 export function OficinasDashboard() {
   const { usuario } = useAuth();
   const [floor, setFloor] = useState<Floor>(1);
@@ -63,11 +73,28 @@ export function OficinasDashboard() {
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
+  // AI suggestion state
+  const [showSugerencia, setShowSugerencia] = useState(false);
+  const [loadingSugerencia, setLoadingSugerencia] = useState(false);
+  const [sugerencias, setSugerencias] = useState<SugerenciaPosicion[]>([]);
+  const [sugerenciaTexto, setSugerenciaTexto] = useState("");
+  const [sugerenciaError, setSugerenciaError] = useState("");
+  const [sugerenciaEmpleado, setSugerenciaEmpleado] = useState<{ id: number; nombre: string; area: string } | null>(null);
+
   const canAssign = usuario?.cargo === 4;
 
   const floorRows = useMemo(() => Array.from({ length: 20 }, (_, idx) => idx + 1), []);
 
   const keyFor = (p: number, r: number, c: number) => `${p}-${r}-${c}`;
+
+  // Build a map of suggestion key -> position rank (1 = best)
+  const sugerenciasMap = useMemo(() => {
+    const map = new Map<string, SugerenciaPosicion>();
+    sugerencias.forEach((s) => {
+      map.set(keyFor(s.piso, s.fila, s.columna), s);
+    });
+    return map;
+  }, [sugerencias]);
 
   const loadOccupied = async () => {
     try {
@@ -145,12 +172,56 @@ export function OficinasDashboard() {
       setSelectedRequestId(null);
       setEmployeeId("");
       setTipoPuesto("");
+      setSugerencias([]);
+      setSugerenciaTexto("");
       await loadOccupied();
     } catch (error: any) {
       setMessage({ type: "error", text: error.message || "No se pudo asignar el puesto." });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSugerenciaIA = async () => {
+    setSugerenciaError("");
+    setSugerencias([]);
+    setSugerenciaTexto("");
+    setSugerenciaEmpleado(null);
+    setLoadingSugerencia(true);
+    setShowSugerencia(true);
+
+    try {
+      const employee = employeeId ? Number(employeeId) : null;
+      const resp = await workstationService.getSugerencia({
+        id_empleado: employee && !Number.isNaN(employee) ? employee : null,
+        tipo_puesto: tipoPuesto || null,
+        piso: selected?.piso ?? null,
+        fila: selected?.fila ?? null,
+        columna: selected?.columna ?? null,
+      });
+
+      setSugerencias(resp.posiciones_recomendadas ?? []);
+      setSugerenciaTexto(resp.respuesta_ia_completa ?? "");
+      setSugerenciaEmpleado(resp.empleado ?? null);
+
+      // Auto-switch floor to show best suggestion if it differs
+      if (resp.posiciones_recomendadas?.length > 0) {
+        const bestFloor = resp.posiciones_recomendadas[0].piso as Floor;
+        if (bestFloor === 1 || bestFloor === 2) {
+          setFloor(bestFloor);
+        }
+      }
+    } catch (error: any) {
+      setSugerenciaError(error.message || "No se pudo obtener la sugerencia de IA.");
+    } finally {
+      setLoadingSugerencia(false);
+    }
+  };
+
+  const handleUseSugerencia = (s: SugerenciaPosicion) => {
+    const f = s.piso as Floor;
+    if (f === 1 || f === 2) setFloor(f);
+    setSelected({ piso: f, fila: s.fila, columna: s.columna });
   };
 
   return (
@@ -201,9 +272,9 @@ export function OficinasDashboard() {
           )}
         </section>
 
-      {detailRequest && (
-        <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
-      )}
+        {detailRequest && (
+          <RequestDetailModal open={!!detailRequest} solicitud={detailRequest} onClose={() => setDetailRequest(null)} />
+        )}
 
         <section className="dashboard-card status-card">
           <h3>Pisos</h3>
@@ -246,6 +317,36 @@ export function OficinasDashboard() {
               ? `Seleccionado: Piso ${selected.piso}, Fila ${selected.fila}, Columna ${selected.columna}`
               : "Selecciona una celda libre en la malla."}
           </p>
+
+          {/* AI Suggestion button */}
+          <button
+            type="button"
+            onClick={handleSugerenciaIA}
+            disabled={loadingSugerencia}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginBottom: "0.75rem",
+              padding: "0.55rem 1.1rem",
+              background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+              color: "#fff",
+              border: "none",
+              borderRadius: "0.5rem",
+              fontWeight: 600,
+              fontSize: "0.9rem",
+              cursor: loadingSugerencia ? "not-allowed" : "pointer",
+              opacity: loadingSugerencia ? 0.75 : 1,
+              transition: "opacity 0.2s, transform 0.15s",
+              boxShadow: "0 2px 8px rgba(124,58,237,0.35)",
+            }}
+            onMouseEnter={(e) => { if (!loadingSugerencia) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"; }}
+          >
+            <span style={{ fontSize: "1rem" }}>✨</span>
+            {loadingSugerencia ? "Consultando IA..." : "Sugerencia de IA"}
+          </button>
+
           <button type="button" className="btn-primary" onClick={handleAssign} disabled={loading || !canAssign}>
             {loading ? "Procesando..." : "Asignar Puesto"}
           </button>
@@ -256,6 +357,145 @@ export function OficinasDashboard() {
       {message.text && (
         <div className={`message-banner ${message.type}`} style={{ marginBottom: "1rem" }}>
           {message.text}
+        </div>
+      )}
+
+      {/* AI Suggestion Panel */}
+      {showSugerencia && (
+        <section
+          className="dashboard-card"
+          style={{
+            marginBottom: "1.5rem",
+            border: "1.5px solid #7c3aed44",
+            background: "linear-gradient(135deg, #1e1b4b08, #4f46e508)",
+            position: "relative",
+          }}
+        >
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+            <h3 style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ fontSize: "1.2rem" }}>✨</span>
+              Sugerencias de IA
+              {sugerenciaEmpleado && (
+                <span style={{ fontSize: "0.82rem", fontWeight: 400, color: "#6366f1", marginLeft: "0.5rem" }}>
+                  — {sugerenciaEmpleado.nombre} · {sugerenciaEmpleado.area}
+                </span>
+              )}
+            </h3>
+            <button
+              type="button"
+              onClick={() => setShowSugerencia(false)}
+              style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1.2rem", color: "#94a3b8", lineHeight: 1 }}
+              title="Cerrar"
+            >
+              ✕
+            </button>
+          </div>
+
+          {loadingSugerencia && (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", color: "#7c3aed", padding: "1rem 0" }}>
+              <span style={{ animation: "spin 1s linear infinite", display: "inline-block" }}>⚙️</span>
+              <span>La IA está analizando la distribución de la oficina...</span>
+            </div>
+          )}
+
+          {sugerenciaError && (
+            <div className="message-banner error">{sugerenciaError}</div>
+          )}
+
+          {!loadingSugerencia && sugerencias.length > 0 && (
+            <>
+              {/* Suggestion cards */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "0.75rem", marginBottom: "1.25rem" }}>
+                {sugerencias.map((s) => (
+                  <div
+                    key={s.numero}
+                    style={{
+                      background: s.numero === 1 ? "linear-gradient(135deg, #7c3aed15, #4f46e515)" : "var(--card-bg, #f8fafc)",
+                      border: s.numero === 1 ? "1.5px solid #7c3aed66" : "1px solid #e2e8f0",
+                      borderRadius: "0.6rem",
+                      padding: "0.85rem 1rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.4rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ fontWeight: 700, fontSize: "0.85rem", color: "#7c3aed" }}>Posición {s.numero}</span>
+                      <StarRating score={s.puntuacion} />
+                    </div>
+                    <div style={{ fontSize: "0.9rem", fontWeight: 600 }}>
+                      Piso {s.piso} · Fila {s.fila} · Col {s.columna}
+                    </div>
+                    <div style={{ fontSize: "0.8rem", color: "#64748b", lineHeight: 1.4 }}>{s.razon}</div>
+                    <button
+                      type="button"
+                      onClick={() => handleUseSugerencia(s)}
+                      style={{
+                        marginTop: "0.3rem",
+                        padding: "0.3rem 0.7rem",
+                        background: "#7c3aed",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "0.35rem",
+                        fontSize: "0.78rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        alignSelf: "flex-start",
+                        transition: "opacity 0.15s",
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+                    >
+                      Usar esta posición
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Full AI response (collapsible) */}
+              {sugerenciaTexto && (
+                <details style={{ marginTop: "0.5rem" }}>
+                  <summary style={{ cursor: "pointer", fontSize: "0.85rem", color: "#6366f1", userSelect: "none", fontWeight: 600 }}>
+                    Ver respuesta completa de la IA
+                  </summary>
+                  <pre
+                    style={{
+                      marginTop: "0.75rem",
+                      padding: "0.85rem 1rem",
+                      background: "#0f172a",
+                      color: "#e2e8f0",
+                      borderRadius: "0.5rem",
+                      fontSize: "0.78rem",
+                      whiteSpace: "pre-wrap",
+                      lineHeight: 1.6,
+                      overflowX: "auto",
+                    }}
+                  >
+                    {sugerenciaTexto}
+                  </pre>
+                </details>
+              )}
+            </>
+          )}
+        </section>
+      )}
+
+      {/* Map legend when suggestions are active */}
+      {sugerencias.length > 0 && (
+        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginBottom: "0.75rem", alignItems: "center", fontSize: "0.82rem" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: 3, background: "#7c3aed" }} /> Sugerencia IA (mejor)
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: 3, background: "#a78bfa" }} /> Sugerencias IA (otras)
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: 3, background: "#22c55e" }} /> Seleccionado
+          </span>
+          <span style={{ display: "flex", alignItems: "center", gap: "0.3rem" }}>
+            <span style={{ display: "inline-block", width: 14, height: 14, borderRadius: 3, background: "#f1f5f9", border: "1px solid #e2e8f0" }} /> Libre
+          </span>
         </div>
       )}
 
@@ -279,6 +519,27 @@ export function OficinasDashboard() {
                     const cellKey = keyFor(floor, row, col);
                     const isOccupied = occupied.has(cellKey);
                     const isSelected = selected?.piso === floor && selected?.fila === row && selected?.columna === col;
+                    const sugerencia = sugerenciasMap.get(cellKey);
+                    const isBestSugerencia = sugerencia?.numero === 1;
+
+                    let bg = "transparent";
+                    let color = "inherit";
+                    let border = "none";
+                    let label = "•";
+
+                    if (isOccupied) {
+                      label = "X";
+                    } else if (isSelected) {
+                      bg = "#22c55e";
+                      color = "#fff";
+                      label = "✓";
+                    } else if (sugerencia) {
+                      bg = isBestSugerencia ? "#7c3aed" : "#a78bfa";
+                      color = "#fff";
+                      border = "none";
+                      label = `${sugerencia.numero}`;
+                    }
+
                     return (
                       <td key={cellKey}>
                         <button
@@ -286,13 +547,18 @@ export function OficinasDashboard() {
                           className="btn-small"
                           onClick={() => setSelected({ piso: floor, fila: row, columna: col })}
                           disabled={isOccupied}
+                          title={sugerencia ? `Posición ${sugerencia.numero}: ${sugerencia.razon}` : undefined}
                           style={{
                             minWidth: "2.2rem",
-                            opacity: isOccupied ? 0.5 : 1,
-                            fontWeight: isSelected ? 700 : 500,
+                            opacity: isOccupied ? 0.4 : 1,
+                            fontWeight: isSelected || sugerencia ? 700 : 500,
+                            background: bg,
+                            color,
+                            border,
+                            transition: "background 0.15s",
                           }}
                         >
-                          {isOccupied ? "X" : isSelected ? "✓" : "•"}
+                          {label}
                         </button>
                       </td>
                     );
@@ -303,6 +569,13 @@ export function OficinasDashboard() {
           </table>
         </div>
       </section>
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }
