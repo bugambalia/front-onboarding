@@ -121,6 +121,47 @@ body {
 	transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
+/* New larger styled variant */
+.menu-toggle.menu-xl {
+	padding: 1.05rem 1.6rem;
+	gap: 1rem;
+	border-radius: 20px;
+	background: linear-gradient(90deg, rgba(40,167,69,0.95), rgba(27,54,93,0.95));
+	box-shadow: 0 10px 30px rgba(15,23,42,0.18);
+	border: none;
+	font-size: 1.18rem;
+}
+
+.menu-toggle.menu-xl .menu-label {
+	color: #ffffff;
+	font-weight: 700;
+	margin-left: 0.35rem;
+}
+
+.menu-toggle.menu-xl .menu-caret {
+	margin-left: 0.45rem;
+	color: rgba(255,255,255,0.95);
+	transition: transform 0.18s ease;
+}
+
+.menu-toggle.menu-xl.open .menu-caret {
+	transform: rotate(180deg) translateY(1px);
+}
+
+.menu-toggle.menu-xl .menu-graphic {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 10px;
+	background: rgba(255,255,255,0.12);
+}
+
+.menu-toggle.menu-xl .menu-graphic .menu-icon span {
+	background: #ffffff;
+}
+
 .menu-label {
 	display: inline;
 	width: auto;

@@ -128,17 +128,20 @@ export function Header() {
             <>
               <button
                 type="button"
-                className={`menu-toggle ${menuOpen ? "open" : ""}`}
+                className={`menu-toggle ${menuOpen ? "open" : ""} menu-xl`}
                 aria-label="Abrir menú"
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen((value) => !value)}
               >
-                <span className="menu-icon" aria-hidden="true">
-                  <span></span>
-                  <span></span>
-                  <span></span>
+                <span className="menu-graphic" aria-hidden="true">
+                  <span className="menu-icon" aria-hidden="true">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </span>
                 </span>
                 <span className="menu-label">Menú</span>
+                <span className="menu-caret" aria-hidden="true">▾</span>
               </button>
 
               <div className={`header-menu ${menuOpen ? "open" : ""}`}>
