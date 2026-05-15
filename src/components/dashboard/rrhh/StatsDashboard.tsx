@@ -180,7 +180,7 @@ export const StatsDashboard: React.FC = () => {
                                     <th>Destinatario</th>
                                     <th>Especificación</th>
                                     <th>Estado</th>
-                                    <th>Minutos</th>
+                                    <th>Días</th>
                                     <th>Finalizado</th>
                                 </tr>
                             </thead>
@@ -191,7 +191,7 @@ export const StatsDashboard: React.FC = () => {
                                         <td>{s.destinatario}</td>
                                         <td>{s.especificacion}</td>
                                         <td>{s.estado_actual}</td>
-                                        <td>{s.total_minutes}</td>
+                                        <td>{s.total_minutes != null ? (Number(s.total_minutes) / 1440).toFixed(2) : '—'}</td>
                                         <td>{s.finalized_at ? new Date(s.finalized_at).toLocaleString() : '—'}</td>
                                     </tr>
                                 ))}
