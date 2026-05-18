@@ -77,9 +77,7 @@ export function OficinasDashboard() {
   const [showSugerencia, setShowSugerencia] = useState(false);
   const [loadingSugerencia, setLoadingSugerencia] = useState(false);
   const [sugerencias, setSugerencias] = useState<SugerenciaPosicion[]>([]);
-  const [sugerenciaTexto, setSugerenciaTexto] = useState("");
   const [sugerenciaError, setSugerenciaError] = useState("");
-  const [sugerenciaEmpleado, setSugerenciaEmpleado] = useState<{ id: number; nombre: string; area: string } | null>(null);
 
   const canAssign = usuario?.cargo === 4;
 
@@ -173,7 +171,6 @@ export function OficinasDashboard() {
       setEmployeeId("");
       setTipoPuesto("");
       setSugerencias([]);
-      setSugerenciaTexto("");
       await loadOccupied();
     } catch (error: any) {
       setMessage({ type: "error", text: error.message || "No se pudo asignar el puesto." });
@@ -185,8 +182,6 @@ export function OficinasDashboard() {
   const handleSugerenciaIA = async () => {
     setSugerenciaError("");
     setSugerencias([]);
-    setSugerenciaTexto("");
-    setSugerenciaEmpleado(null);
     setLoadingSugerencia(true);
     setShowSugerencia(true);
 
@@ -201,8 +196,6 @@ export function OficinasDashboard() {
       });
 
       setSugerencias(resp.posiciones_recomendadas ?? []);
-      setSugerenciaTexto(resp.respuesta_ia_completa ?? "");
-      setSugerenciaEmpleado(resp.empleado ?? null);
 
       // Auto-switch floor to show best suggestion if it differs
       if (resp.posiciones_recomendadas?.length > 0) {
@@ -376,11 +369,6 @@ export function OficinasDashboard() {
             <h3 style={{ margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ fontSize: "1.2rem" }}>✨</span>
               Sugerencias de IA
-              {sugerenciaEmpleado && (
-                <span style={{ fontSize: "0.82rem", fontWeight: 400, color: "#6366f1", marginLeft: "0.5rem" }}>
-                  — {sugerenciaEmpleado.nombre} · {sugerenciaEmpleado.area}
-                </span>
-              )}
             </h3>
             <button
               type="button"
@@ -453,29 +441,7 @@ export function OficinasDashboard() {
                 ))}
               </div>
 
-              {/* Full AI response (collapsible) */}
-              {sugerenciaTexto && (
-                <details style={{ marginTop: "0.5rem" }}>
-                  <summary style={{ cursor: "pointer", fontSize: "0.85rem", color: "#6366f1", userSelect: "none", fontWeight: 600 }}>
-                    Ver respuesta completa de la IA
-                  </summary>
-                  <pre
-                    style={{
-                      marginTop: "0.75rem",
-                      padding: "0.85rem 1rem",
-                      background: "#0f172a",
-                      color: "#e2e8f0",
-                      borderRadius: "0.5rem",
-                      fontSize: "0.78rem",
-                      whiteSpace: "pre-wrap",
-                      lineHeight: 1.6,
-                      overflowX: "auto",
-                    }}
-                  >
-                    {sugerenciaTexto}
-                  </pre>
-                </details>
-              )}
+
             </>
           )}
         </section>
