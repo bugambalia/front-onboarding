@@ -87,6 +87,11 @@ export function OficinasDashboard() {
 
   const keyFor = (p: number, r: number, c: number) => `${p}-${r}-${c}`;
 
+  const truncateText = (text?: string, max = 60) => {
+    if (!text) return "";
+    return text.length > max ? `${text.slice(0, max - 1)}…` : text;
+  };
+
   // Build a map of suggestion key -> position rank (1 = best)
   const sugerenciasMap = useMemo(() => {
     const map = new Map<string, SugerenciaPosicion>();
@@ -203,6 +208,20 @@ export function OficinasDashboard() {
       setSugerencias(resp.posiciones_recomendadas ?? []);
       setSugerenciaTexto(resp.respuesta_ia_completa ?? "");
       setSugerenciaEmpleado(resp.empleado ?? null);
+
+      // Merge puestos ocupados from response into occupied set (if provided)
+      if (resp.puestos_ocupados) {
+        try {
+          const respOccupied = extractPositions(resp.puestos_ocupados);
+          setOccupied((prev) => {
+            const newSet = new Set(prev);
+            respOccupied.forEach((p) => newSet.add(keyFor(p.piso, p.fila, p.columna)));
+            return newSet;
+          });
+        } catch (e) {
+          // ignore parse issues from response
+        }
+      }
 
       // Auto-switch floor to show best suggestion if it differs
       if (resp.posiciones_recomendadas?.length > 0) {
@@ -515,50 +534,45 @@ export function OficinasDashboard() {
               {floorRows.map((row) => (
                 <tr key={`row-${row}`}>
                   <td><strong>{row}</strong></td>
-                  {floorRows.map((col) => {
+                    {floorRows.map((col) => {
                     const cellKey = keyFor(floor, row, col);
                     const isOccupied = occupied.has(cellKey);
                     const isSelected = selected?.piso === floor && selected?.fila === row && selected?.columna === col;
                     const sugerencia = sugerenciasMap.get(cellKey);
                     const isBestSugerencia = sugerencia?.numero === 1;
 
-                    let bg = "transparent";
-                    let color = "inherit";
-                    let border = "none";
-                    let label = "•";
-
-                    if (isOccupied) {
-                      label = "X";
-                    } else if (isSelected) {
-                      bg = "#22c55e";
-                      color = "#fff";
-                      label = "✓";
-                    } else if (sugerencia) {
-                      bg = isBestSugerencia ? "#7c3aed" : "#a78bfa";
-                      color = "#fff";
-                      border = "none";
-                      label = `${sugerencia.numero}`;
+                    const classes = ["btn-small", "celda"];
+                    if (isOccupied) classes.push("celda-ocupado");
+                    else if (isSelected) classes.push("celda-selected");
+                    else if (sugerencia) {
+                      classes.push("celda-sugerencia");
+                      if (isBestSugerencia) classes.push("celda-sugerencia-mejor");
                     }
+
+                    const title = sugerencia ? `Posición ${sugerencia.numero}: ${sugerencia.razon}` : undefined;
+
+                    let label = "•";
+                    if (isOccupied) label = "X";
+                    else if (isSelected) label = "✓";
+                    else if (sugerencia) label = `${sugerencia.numero}`;
 
                     return (
                       <td key={cellKey}>
                         <button
                           type="button"
-                          className="btn-small"
+                          className={classes.join(" ")}
                           onClick={() => setSelected({ piso: floor, fila: row, columna: col })}
                           disabled={isOccupied}
-                          title={sugerencia ? `Posición ${sugerencia.numero}: ${sugerencia.razon}` : undefined}
-                          style={{
-                            minWidth: "2.2rem",
-                            opacity: isOccupied ? 0.4 : 1,
-                            fontWeight: isSelected || sugerencia ? 700 : 500,
-                            background: bg,
-                            color,
-                            border,
-                            transition: "background 0.15s",
-                          }}
+                          title={title}
+                          aria-label={title}
                         >
-                          {label}
+                          <span>{label}</span>
+                          {sugerencia && (
+                            <>
+                              <span className="badge-sugerencia" title={sugerencia.razon}>{truncateText(sugerencia.razon, 48)}</span>
+                              <span className="badge-puntuacion" aria-hidden>{sugerencia.puntuacion}★</span>
+                            </>
+                          )}
                         </button>
                       </td>
                     );

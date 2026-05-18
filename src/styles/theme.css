@@ -27,3 +27,56 @@ body {
   color: var(--color-text);
   background-color: var(--color-background);
 }
+
+/* Sugerencias en la malla de oficinas */
+.celda {
+  min-width: 2.2rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 0.35rem;
+  transition: background 0.15s, transform 0.12s, opacity 0.12s;
+  font-weight: 600;
+}
+
+.celda-ocupado {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.celda-selected {
+  background: #22c55e;
+  color: #fff;
+}
+
+.celda-sugerencia {
+  background: #a78bfa;
+  color: #fff;
+}
+
+.celda-sugerencia-mejor {
+  background: #7c3aed;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(124,58,237,0.14);
+}
+
+.badge-sugerencia {
+  display: inline-block;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 0.06rem 0.32rem;
+  border-radius: 4px;
+  margin-left: 0.45rem;
+  max-width: 10rem;
+  vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge-puntuacion {
+  display: inline-block;
+  font-size: 0.66rem;
+  color: #f59e0b;
+  margin-left: 0.35rem;
+}
+

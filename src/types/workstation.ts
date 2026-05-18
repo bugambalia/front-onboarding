@@ -48,6 +48,7 @@ export interface WorkstationSugerenciaResponse {
     por_tipo: Record<string, number>;
     por_area: Record<string, number>;
   };
+  puestos_ocupados?: WorkstationResponse[];
   empleado?: {
     id: number;
     nombre: string;
